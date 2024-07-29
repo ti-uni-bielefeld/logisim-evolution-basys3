@@ -1,0 +1,42 @@
+diff --git a/src/main/java/com/cburch/logisim/fpga/settings/BoardList.java b/src/main/java/com/cburch/logisim/fpga/settings/BoardList.java
+index 880496a35..3c032a255 100644
+--- a/src/main/java/com/cburch/logisim/fpga/settings/BoardList.java
++++ b/src/main/java/com/cburch/logisim/fpga/settings/BoardList.java
+@@ -35,7 +35,7 @@ public class BoardList {
+     } else {
+       ret.addAll(getBoardsfromJar(pattern, match, file));
+     }
+-    return ret;
++    return ret.stream().filter(board -> getBoardName(board).equals("BASYS3")).toList();
+   }
+ 
+   private static Collection<String> getBoardsfromDirectory(
+diff --git a/src/main/java/com/cburch/logisim/prefs/FpgaBoards.java b/src/main/java/com/cburch/logisim/prefs/FpgaBoards.java
+index a6b4f512e..86c1a4260 100644
+--- a/src/main/java/com/cburch/logisim/prefs/FpgaBoards.java
++++ b/src/main/java/com/cburch/logisim/prefs/FpgaBoards.java
+@@ -373,8 +373,7 @@ public class FpgaBoards implements ActionListener {
+     if (boardSelector == null) return;
+     boardSelector.removeActionListener(this);
+     boardSelector.removeAllItems();
+-    boardSelector.addItem("Other");
+-    var index = 1;
++    var index = 0;
+     var found = false;
+     if (update) AppPreferences.SelectedBoard.set(board);
+     for (String item : buildInBoards.getBoardNames()) {
+@@ -386,11 +385,12 @@ public class FpgaBoards implements ActionListener {
+       index++;
+     }
+     if (!found) {
+-      AppPreferences.SelectedBoard.set(boardSelector.getItemAt(1));
+-      boardSelector.setSelectedIndex(1);
++      AppPreferences.SelectedBoard.set(boardSelector.getItemAt(0));
++      boardSelector.setSelectedIndex(0);
+     }
+     boardSelector.repaint();
+     boardSelector.addActionListener(this);
++    boardSelector.setVisible(false);
+   }
+ 
+   /**

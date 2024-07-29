@@ -1,0 +1,726 @@
+diff --git a/src/main/java/com/cburch/logisim/std/io/Keyboard.java b/src/main/java/com/cburch/logisim/std/io/Keyboard.java
+index 8a76e4ed2..f98110f65 100644
+--- a/src/main/java/com/cburch/logisim/std/io/Keyboard.java
++++ b/src/main/java/com/cburch/logisim/std/io/Keyboard.java
+@@ -17,7 +17,9 @@ import com.cburch.logisim.data.BitWidth;
+ import com.cburch.logisim.data.Bounds;
+ import com.cburch.logisim.data.Direction;
+ import com.cburch.logisim.data.Value;
++import com.cburch.logisim.fpga.data.ComponentMapInformationContainer;
+ import com.cburch.logisim.gui.icons.KeyboardIcon;
++import com.cburch.logisim.instance.Instance;
+ import com.cburch.logisim.instance.InstanceFactory;
+ import com.cburch.logisim.instance.InstancePainter;
+ import com.cburch.logisim.instance.InstancePoker;
+@@ -25,12 +27,15 @@ import com.cburch.logisim.instance.InstanceState;
+ import com.cburch.logisim.instance.Port;
+ import com.cburch.logisim.instance.StdAttr;
+ import com.cburch.logisim.prefs.AppPreferences;
++import com.cburch.logisim.util.GraphicsUtil;
++
+ import java.awt.Color;
+ import java.awt.Font;
+ import java.awt.FontMetrics;
+ import java.awt.Graphics;
+ import java.awt.event.KeyEvent;
+ import java.util.ArrayList;
++import java.util.Arrays;
+ 
+ public class Keyboard extends InstanceFactory {
+   /**
+@@ -134,13 +139,16 @@ public class Keyboard extends InstanceFactory {
+     return ret;
+   }
+ 
+-  private static final int CLR = 0;
++  public static final int CLR = 0;
++
++  public static final int CK = 1;
++  public static final int RE = 2;
+ 
+-  private static final int CK = 1;
+-  private static final int RE = 2;
++  public static final int AVL = 3;
++  public static final int OUT = 4;
+ 
+-  private static final int AVL = 3;
+-  private static final int OUT = 4;
++  public static final String PS2_CLK_LABEL = "ps2_clk";
++  public static final String PS2_DATA_LABEL = "ps2_data";
+ 
+   private static final int DELAY0 = 9;
+   private static final int DELAY1 = 11;
+@@ -154,14 +162,30 @@ public class Keyboard extends InstanceFactory {
+   @SuppressWarnings("checkstyle:IllegalTokenText")
+   private static final char FORM_FEED = 12; // control-L (LINE FEED)
+ 
+-  private static final Attribute<Integer> ATTR_BUFFER =
++  public static final Attribute<Integer> ATTR_BUFFER =
+       Attributes.forIntegerRange("buflen", S.getter("keybBufferLengthAttr"), 1, 256);
+ 
+   public Keyboard() {
+-    super(_ID, S.getter("keyboardComponent"));
++    super(_ID, S.getter("keyboardComponent"), new KeyboardHdlGeneratorFactory(), true);
+     setAttributes(
+-        new Attribute[] {ATTR_BUFFER, StdAttr.EDGE_TRIGGER},
+-        new Object[] {32, StdAttr.TRIG_RISING});
++        new Attribute[] {
++          ATTR_BUFFER,
++          StdAttr.EDGE_TRIGGER,
++          StdAttr.LABEL,
++          StdAttr.LABEL_FONT,
++          StdAttr.LABEL_VISIBILITY,
++          StdAttr.MAPINFO,
++        },
++        new Object[] {
++          32,
++          StdAttr.TRIG_RISING,
++          "",
++          StdAttr.DEFAULT_LABEL_FONT,
++          true,
++            new ComponentMapInformationContainer(2, 0, 0,
++                new ArrayList<String>(Arrays.asList(PS2_CLK_LABEL, PS2_DATA_LABEL)),
++                null, null),
++        });
+     setOffsetBounds(Bounds.create(0, -15, WIDTH, HEIGHT));
+     setIcon(new KeyboardIcon());
+     setInstancePoker(Poker.class);
+@@ -284,11 +308,31 @@ public class Keyboard extends InstanceFactory {
+     }
+   }
+ 
++  public static void computeTextField(Instance instance) {
++    final var bds = instance.getBounds();
++    instance.setTextField(StdAttr.LABEL, StdAttr.LABEL_FONT, bds.getX() + bds.getWidth() / 2, bds.getY() - 2,
++        GraphicsUtil.H_CENTER, GraphicsUtil.V_BOTTOM);
++  }
++
++  @Override
++  protected void configureNewInstance(Instance instance) {
++    instance.addAttributeListener();
++    computeTextField(instance);
++  };
++
++  @Override
++  protected void instanceAttributeChanged(Instance instance, com.cburch.logisim.data.Attribute<?> attr) {
++    if (attr == StdAttr.LABEL) {
++      computeTextField(instance);
++    }
++  };
++
+   @Override
+   public void paintInstance(InstancePainter painter) {
+     final var showState = painter.getShowState();
+     final var g = painter.getGraphics();
+     g.setColor(new Color(AppPreferences.COMPONENT_COLOR.get()));
++    painter.drawLabel();
+     painter.drawClock(CK, Direction.EAST);
+     painter.drawBounds();
+     painter.drawPort(CLR);
+diff --git a/src/main/java/com/cburch/logisim/std/io/KeyboardHdlGeneratorFactory.java b/src/main/java/com/cburch/logisim/std/io/KeyboardHdlGeneratorFactory.java
+new file mode 100644
+index 000000000..e2c8af8d9
+--- /dev/null
++++ b/src/main/java/com/cburch/logisim/std/io/KeyboardHdlGeneratorFactory.java
+@@ -0,0 +1,601 @@
++package com.cburch.logisim.std.io;
++
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++
++import com.cburch.logisim.data.AttributeOption;
++import com.cburch.logisim.data.AttributeSet;
++import com.cburch.logisim.fpga.designrulecheck.Netlist;
++import com.cburch.logisim.fpga.designrulecheck.netlistComponent;
++import com.cburch.logisim.fpga.hdlgenerator.AbstractHdlGeneratorFactory;
++import com.cburch.logisim.fpga.hdlgenerator.Hdl;
++import com.cburch.logisim.fpga.hdlgenerator.HdlParameters;
++import com.cburch.logisim.fpga.hdlgenerator.HdlPorts;
++import com.cburch.logisim.instance.Port;
++import com.cburch.logisim.instance.StdAttr;
++import com.cburch.logisim.util.LineBuffer;
++
++public class KeyboardHdlGeneratorFactory extends AbstractHdlGeneratorFactory {
++    private static final String BUFFER_LENGTH_STRING = "buffer_length";
++    private static final int BUFFER_LENGTH_ID = -1;
++    private static final String INVERT_CLOCK_STRING = "invert_clock_enable";
++    private static final int INVERT_CLOCK_ID = -2;
++    private static final int MACHINE_TYPE_ID = -3;
++    private static final int CLK_FREQ_ID = -4;
++    private static final int PS2_DEBOUNCE_COUNTER_SIZE_ID = -5;
++
++    public KeyboardHdlGeneratorFactory() {
++        super();
++
++        final int GLOBAL_CLK_FREQ = 100_000_000;
++
++        myParametersList
++                .add(BUFFER_LENGTH_STRING, BUFFER_LENGTH_ID, HdlParameters.MAP_INT_ATTRIBUTE, Keyboard.ATTR_BUFFER)
++                .add(INVERT_CLOCK_STRING, INVERT_CLOCK_ID, HdlParameters.MAP_ATTRIBUTE_OPTION, StdAttr.EDGE_TRIGGER,
++                        new HashMap<AttributeOption, Integer>() {
++                            {
++                                put(StdAttr.TRIG_FALLING, 1);
++                                put(StdAttr.TRIG_RISING, 0);
++                            }
++                        })
++                .add("clk_freq", CLK_FREQ_ID, HdlParameters.MAP_CONSTANT, GLOBAL_CLK_FREQ)
++                .add("ps2_debounce_counter_size", PS2_DEBOUNCE_COUNTER_SIZE_ID, HdlParameters.MAP_CONSTANT,
++                        Math.round(Math.log(GLOBAL_CLK_FREQ / 100000.0) / Math.log(2)));
++        myPorts
++                .add(Port.CLOCK, HdlPorts.CLOCK, 1, Keyboard.CK)
++                .add(Port.INPUT, "clk", 1, Keyboard.CK)
++                .add(Port.INPUT, "reset", 1, Keyboard.CLR)
++                .add(Port.INPUT, "read_enable", 1, Keyboard.RE)
++                .add(Port.OUTPUT, "available", 1, Keyboard.AVL)
++                .add(Port.OUTPUT, "data", 7, Keyboard.OUT)
++                .add(Port.INPUT, Keyboard.PS2_CLK_LABEL, 1, -1)
++                .add(Port.INPUT, Keyboard.PS2_DATA_LABEL, 1, -2);
++        myTypedWires
++                .addEnum(MACHINE_TYPE_ID, "machine")
++                .addEnumEntry(MACHINE_TYPE_ID, "ready")
++                .addEnumEntry(MACHINE_TYPE_ID, "new_code")
++                .addEnumEntry(MACHINE_TYPE_ID, "translate")
++                .addEnumEntry(MACHINE_TYPE_ID, "output")
++                .addWire("state", MACHINE_TYPE_ID);
++        myWires
++                .addWire("ps2_code_new", 1)
++                .addWire("prev_ps2_code_new", 1)
++                .addWire("ps2_code", 8)
++                .addWire("break", 1)
++                .addWire("e0_code", 1)
++                .addWire("caps_lock", 1)
++                .addWire("control_r", 1)
++                .addWire("control_l", 1)
++                .addWire("shift_r", 1)
++                .addWire("shift_l", 1)
++                .addWire("ascii", 8)
++                .addWire("ascii_code", 7)
++                .addWire("ascii_new", 1)
++                .addWire("real_clk", 1);
++    }
++
++    @Override
++    public boolean isHdlSupportedTarget(AttributeSet attrs) {
++        return Hdl.isVhdl();
++    }
++
++    @Override
++    public Map<String, String> getPortMap(Netlist nets, Object mapInfo) {
++        final var map = super.getPortMap(nets, mapInfo);
++        if (!(mapInfo instanceof final netlistComponent componentInfo))
++            return map;
++        map.put(Keyboard.PS2_CLK_LABEL, String.format("%s(%d)",
++                LOCAL_INPUT_BUBBLE_BUS_NAME, componentInfo.getLocalBubbleInputStartId()));
++        map.put(Keyboard.PS2_DATA_LABEL, String.format("%s(%d)",
++                LOCAL_INPUT_BUBBLE_BUS_NAME, componentInfo.getLocalBubbleInputStartId() + 1));
++        return map;
++    }
++
++    @Override
++    public LineBuffer getComponentDeclarationSection(Netlist theNetlist, AttributeSet attrs) {
++        final var contents = LineBuffer.getHdlBuffer();
++        getExtraComponents(false).forEach(contents::add);
++        return contents;
++    }
++
++    private List<LineBuffer> getExtraComponents(boolean isEntity) {
++        final var components = new ArrayList<LineBuffer>();
++        components.add(LineBuffer.getHdlBuffer().addVhdlKeywords()
++                .add(isEntity ? "{{entity}} ring_buffer {{is}}" : "{{component}} ring_buffer")
++                .add("""
++                        {{generic}} (buffer_size : {{integer}} := 9);
++                        {{port}} (consume      : {{in}}  std_logic;
++                              data_in      : {{in}}  std_logic_vector(6 {{downto}} 0);
++                              read_clock   : {{in}}  std_logic;
++                              rst          : {{in}}  std_logic;
++                              write_clock  : {{in}}  std_logic;
++                              write_enable : {{in}}  std_logic;
++                              data_out     : {{out}} std_logic_vector(6 {{downto}} 0);
++                              available    : {{out}} std_logic);
++                        """)
++                .add(isEntity ? "{{end}} {{entity}} ring_buffer;" : "{{end}} {{component}};"));
++        if (isEntity) {
++            components.add(LineBuffer.getHdlBuffer().addVhdlKeywords()
++                    .add(isEntity ? "{{entity}} debounce {{is}}" : "{{component}} debounce")
++                    .add("""
++                            {{generic}} (
++                                counter_size : {{integer}}); --counter size (19 bits gives 10.5ms with 50MHz clock)
++                            {{port}} (
++                                clk    : {{in}}  std_logic; --input clock
++                                button : {{in}}  std_logic; --input signal to be debounced
++                                result : {{out}} std_logic); --debounced signal
++                            """)
++                    .add(isEntity ? "{{end}} {{entity}};" : "{{end}} {{component}};"));
++        }
++        components.add(LineBuffer.getHdlBuffer().addVhdlKeywords()
++                .add(isEntity ? "{{entity}} ps2_keyboard {{is}}" : "{{component}} ps2_keyboard")
++                .add("""
++                        {{generic}} (
++                            clk_freq              : {{integer}} := 50_000_000; --system clock frequency in Hz
++                            debounce_counter_size : {{integer}}); --set such that (2^size)/clk_freq = 5us (size = 8 for 50MHz)
++                        {{port}} (
++                            clk          : {{in}}  std_logic; --system clock
++                            ps2_clk      : {{in}}  std_logic; --clock signal from PS/2 keyboard
++                            ps2_data     : {{in}}  std_logic; --data signal from PS/2 keyboard
++                            ps2_code_new : {{out}} std_logic; --flag that new PS/2 code is available on ps2_code bus
++                            ps2_code     : {{out}} std_logic_vector(7 {{downto}} 0)); --code received from PS/2
++                        """)
++                .add(isEntity ? "{{end}} {{entity}};" : "{{end}} {{component}};"));
++        return components;
++    }
++
++    @Override
++    public List<String> getArchitecture(Netlist theNetlist, AttributeSet attrs, String componentName) {
++        if (!Hdl.isVhdl()) {
++            throw new UnsupportedOperationException("Only VHDL is supported");
++        }
++        final var contents = LineBuffer.getHdlBuffer()
++                .add(super.getArchitecture(theNetlist, attrs, componentName))
++                .empty(3);
++        contents.addVhdlKeywords()
++                .add("""
++                        {{architecture}} platformIndependent {{of}} ring_buffer {{is}}
++                          {{subtype}} index_type {{is}} {{integer}} {{range}} 0 {{to}} buffer_size - 1;
++                          {{signal}} read_pointer_value  : index_type;
++                          {{signal}} write_pointer_value : index_type;
++                          {{signal}} do_write            : std_logic;
++                          {{signal}} empty_i             : std_logic;
++                          {{signal}} do_read             : std_logic;
++                          {{signal}} full_i              : std_logic;
++
++                          {{type}} buffer_type {{is}} {{array}} (0 {{to}} buffer_size - 1) {{of}} std_logic_vector(6 {{downto}} 0);
++                          {{signal}} state : buffer_type;
++
++                        {{begin}}
++                          data_out <= state(read_pointer_value) {{when}} empty_i = '0' {{else}} ({{others}} => '0');
++                          available    <= {{not}} empty_i;
++
++                          full_i  <= '1' {{when}} (write_pointer_value + 1) = read_pointer_value {{else}} '0';
++                          empty_i <= '1' {{when}} write_pointer_value = read_pointer_value {{else}} '0';
++
++                          do_read  <= ({{not}} empty_i) {{and}} consume;
++                          do_write <= write_enable {{and}} {{not}} full_i;
++
++                          {{process}} (read_clock, rst)
++                          {{begin}}
++                            {{if}} rst = '1' {{then}}
++                              read_pointer_value <= 0;
++                            {{elsif}} rising_edge(read_clock) {{then}}
++                              {{if}} do_read = '1' {{then}}
++                                read_pointer_value <= read_pointer_value + 1;
++                              {{end}} {{if}};
++                            {{end}} {{if}};
++                          {{end}} {{process}};
++
++                          {{process}} (write_clock, rst)
++                          {{begin}}
++                            {{if}} rst = '1' {{then}}
++                              write_pointer_value <= 0;
++                            {{elsif}} rising_edge(write_clock) {{then}}
++                              {{if}} do_write = '1' {{then}}
++                                write_pointer_value <= write_pointer_value + 1;
++                              {{end}} {{if}};
++                            {{end}} {{if}};
++                          {{end}} {{process}};
++
++                          {{process}} (write_clock, write_pointer_value, data_in, do_write) {{is}}
++                          {{begin}}
++                            {{if}} rising_edge(write_clock) {{then}}
++                              {{if}} do_write = '1' {{then}}
++                                state(write_pointer_value) <= data_in;
++                              {{end}} {{if}};
++                            {{end}} {{if}};
++                          {{end}} {{process}};
++
++                        {{end}} {{architecture}};
++                        """)
++                .add("""
++                        {{architecture}} logic {{of}} debounce {{is}}
++                            {{signal}} flipflops   : std_logic_vector(1 {{downto}} 0);                               --input flip flops
++                            {{signal}} counter_set : std_logic;                                                  --sync reset to zero
++                            {{signal}} counter_out : std_logic_vector(counter_size {{downto}} 0) := ({{others}} => '0'); --counter output
++                        {{begin}}
++
++                        counter_set <= flipflops(0) {{xor}} flipflops(1); --determine when to start/reset counter
++
++                        {{process}} (clk)
++                            {{begin}}
++                                {{if}} rising_edge(clk) {{then}}
++                                    flipflops(0) <= button;
++                                    flipflops(1) <= flipflops(0);
++                                    {{if}} (counter_set = '1') {{then}} --reset counter because input is changing
++                                        counter_out <= ({{others}} => '0');
++                                    {{elsif}} (counter_out(counter_size) = '0') {{then}} --stable input time is not yet met
++                                        counter_out <= std_logic_vector(unsigned(counter_out) + 1);
++                                    {{else}} --stable input time is met
++                                        result <= flipflops(1);
++                                    {{end}} {{if}};
++                                {{end}} {{if}};
++                            {{end}} {{process}};
++                        {{end}} {{architecture}};
++                        """)
++                .add("""
++                        {{architecture}} logic {{of}} ps2_keyboard {{is}}
++                            {{signal}} sync_ffs     : std_logic_vector(1 {{downto}} 0);         --synchronizer flip-flops for PS/2 signals
++                            {{signal}} ps2_clk_int  : std_logic;                            --debounced clock signal from PS/2 keyboard
++                            {{signal}} ps2_data_int : std_logic;                            --debounced data signal from PS/2 keyboard
++                            {{signal}} ps2_word     : std_logic_vector(10 {{downto}} 0);        --stores the ps2 data word
++                            {{signal}} error        : std_logic;                            --validate parity, start, and stop bits
++                            {{signal}} count_idle   : {{integer}} {{range}} 0 {{to}} clk_freq / 18_000; --counter to determine PS/2 is idle
++
++                            --declare debounce component for debouncing PS2 input signals
++                            {{component}} debounce {{is}}
++                                {{generic}} (
++                                    counter_size : {{integer}}); --debounce period (in seconds) = 2^counter_size/(clk freq in Hz)
++                                {{port}} (
++                                    clk    : {{in}}  std_logic; --input clock
++                                    button : {{in}}  std_logic; --input signal to be debounced
++                                    result : {{out}} std_logic); --debounced signal
++                            {{end}} {{component}};
++                            {{begin}}
++
++                            --synchronizer flip-flops
++                            {{process}} (clk)
++                            {{begin}}
++                                {{if}} rising_edge(clk) {{then}}
++                                    sync_ffs(0) <= ps2_clk; --synchronize PS/2 clock signal
++                                    sync_ffs(1) <= ps2_data; --synchronize PS/2 data signal
++                                {{end}} {{if}};
++                            {{end}} {{process}};
++
++                            --debounce PS2 input signals
++                            debounce_ps2_clk: debounce
++                                {{generic}} {{map}} (counter_size => debounce_counter_size)
++                                {{port}} {{map}} (clk => clk, button => sync_ffs(0), result => ps2_clk_int);
++                            debounce_ps2_data: debounce
++                                {{generic}} {{map}} (counter_size => debounce_counter_size)
++                                {{port}} {{map}} (clk => clk, button => sync_ffs(1), result => ps2_data_int);
++
++                            --input PS2 data
++                            {{process}} (ps2_clk_int)
++                            {{begin}}
++                                {{if}} falling_edge(ps2_clk_int) {{then}}
++                                    ps2_word <= ps2_data_int & ps2_word(10 {{downto}} 1); --shift in PS2 data bit
++                                {{end}} {{if}};
++                            {{end}} {{process}};
++
++                            --verify that parity, start, and stop bits are all correct
++                            error <= {{not}}({{not}} ps2_word(0) {{and}} ps2_word(10) {{and}} (ps2_word(9) {{xor}} ps2_word(8) {{xor}} ps2_word(7) {{xor}} ps2_word(6) {{xor}} ps2_word(5) {{xor}} ps2_word(4) {{xor}} ps2_word(3) {{xor}} ps2_word(2) {{xor}} ps2_word(1)));
++
++                            --determine if PS2 port is idle (i.e. last transaction is finished) and output result
++                            {{process}} (clk)
++                            {{begin}}
++                                {{if}} rising_edge(clk) {{then}}
++                                    {{if}} (ps2_clk_int = '0') {{then}} --low PS2 clock, PS/2 is active
++                                        count_idle <= 0; --reset idle counter
++                                    {{elsif}} (count_idle /= clk_freq / 18_000) {{then}} --PS2 clock has been high less than a half clock period (<55us)
++                                        count_idle <= count_idle + 1; --continue counting
++                                    {{end}} {{if}};
++
++                                    {{if}} (count_idle = clk_freq / 18_000 {{and}} error = '0') {{then}} --idle threshold reached and no errors detected
++                                        ps2_code_new <= '1'; --set flag that new PS/2 code is available
++                                        ps2_code <= ps2_word(8 {{downto}} 1); --output new PS/2 code
++                                    {{else}} --PS/2 port active or error detected
++                                        ps2_code_new <= '0'; --set flag that PS/2 transaction is in progress
++                                    {{end}} {{if}};
++                                {{end}} {{if}};
++                            {{end}} {{process}};
++
++                        {{end}} {{architecture}};
++                        """);
++        return contents.get();
++    }
++
++    @Override
++    public List<String> getEntity(Netlist theNetlist, AttributeSet attrs, String componentName) {
++        final var contents = LineBuffer.getHdlBuffer()
++                .add(super.getEntity(theNetlist, attrs, componentName));
++        for (final var extraComponent : getExtraComponents(true)) {
++            contents.add(Hdl.getExtendedLibrary())
++                    .add(extraComponent);
++        }
++        return contents.get();
++    }
++
++    @Override
++    public LineBuffer getModuleFunctionality(Netlist netlist, AttributeSet attrs) {
++        if (!Hdl.isVhdl()) {
++            throw new UnsupportedOperationException("Only VHDL is supported");
++        }
++        final var contents = LineBuffer
++                .getHdlBuffer()
++                .addVhdlKeywords();
++        contents
++                .pair("buffer_length", BUFFER_LENGTH_STRING)
++                .pair("invert_clock", INVERT_CLOCK_STRING)
++                .add("""
++                        real_clk <= clk {{when}} {{invert_clock}} = 0 {{else}} {{not}} clk;
++
++                        --instantiate PS2 keyboard interface logic
++                        ps2_keyboard_0: ps2_keyboard
++                            {{generic}} {{map}} (clk_freq => clk_freq, debounce_counter_size => ps2_debounce_counter_size)
++                            {{port}} {{map}} (clk => clock, ps2_clk => ps2_clk, ps2_data => ps2_data, ps2_code_new => ps2_code_new, ps2_code => ps2_code);
++
++                        --instantiate ring buffer for ascii codes
++                        ringBuffer_0: ring_buffer
++                            {{generic}} {{map}} (buffer_size => {{buffer_length}})
++                            {{port}} {{map}} (
++                                consume => read_enable,
++                                data_in => ascii(6 {{downto}} 0),
++                                data_out => data,
++                                rst => reset,
++                                write_clock => clock,
++                                write_enable => ascii_new,
++                                read_clock => real_clk,
++                                available => available
++                            );
++
++
++                        {{process}} (clock)
++                        {{begin}}
++                            {{if}} rising_edge(clock) {{then}}
++                            prev_ps2_code_new <= ps2_code_new; --keep track of previous ps2_code_new values to determine low-to-high transitions
++                            {{case}} state {{is}}
++
++                                --ready state: wait for a new PS2 code to be received
++                                {{when}} ready =>
++                                    ascii_new <= '0'; --reset new ASCII code indicator
++                                    {{if}} (prev_ps2_code_new = '0' {{and}} ps2_code_new = '1') {{then}} --new PS2 code received
++                                        state <= new_code; --proceed to new_code state
++                                    {{else}} --no new PS2 code received yet
++                                        state <= ready; --remain in ready state
++                                    {{end}} {{if}};
++
++                                --new_code state: determine what to do with the new PS2 code
++                                {{when}} new_code =>
++                                    {{if}} (ps2_code = x"F0") {{then}} --code indicates that next command is break
++                                        break <= '1'; --set break flag
++                                        state <= ready; --return to ready state to await next PS2 code
++                                    {{elsif}} (ps2_code = x"E0") {{then}} --code indicates multi-key command
++                                        e0_code <= '1'; --set multi-code command flag
++                                        state <= ready; --return to ready state to await next PS2 code
++                                    {{else}} --code is the last PS2 code in the make/break code
++                                        ascii(7) <= '1'; --set internal ascii value to unsupported code (for verification)
++                                        state <= translate; --proceed to translate state
++                                    {{end}} {{if}};
++
++                                --translate state: translate PS2 code to ASCII value
++                                {{when}} translate =>
++                                    break <= '0'; --reset break flag
++                                    e0_code <= '0'; --reset multi-code command flag
++
++                                    --handle codes for control, shift, and caps lock
++                                    {{case}} ps2_code {{is}}
++                                        {{when}} x"58" => --caps lock code
++                                            {{if}} (break = '0') {{then}} --if make command
++                                                caps_lock <= {{not}} caps_lock; --toggle caps lock
++                                            {{end}} {{if}};
++                                        {{when}} x"14" => --code for the control keys
++                                            {{if}} (e0_code = '1') {{then}} --code for right control
++                                                control_r <= {{not}} break; --update right control flag
++                                            {{else}} --code for left control
++                                                control_l <= {{not}} break; --update left control flag
++                                            {{end}} {{if}};
++                                        {{when}} x"12" => --left shift code
++                                            shift_l <= {{not}} break; --update left shift flag
++                                        {{when}} x"59" => --right shift code
++                                            shift_r <= {{not}} break; --update right shift flag
++                                        {{when}} {{others}} => {{null}};
++                                    {{end}} {{case}};
++
++                                    --translate control codes (these do not depend on shift or caps lock)
++                                    {{if}} (control_l = '1' {{or}} control_r = '1') {{then}}
++                                        {{case}} ps2_code {{is}}
++                                            {{when}} x"1E" => ascii <= x"00"; --^@  NUL
++                                            {{when}} x"1C" => ascii <= x"01"; --^A  SOH
++                                            {{when}} x"32" => ascii <= x"02"; --^B  STX
++                                            {{when}} x"21" => ascii <= x"03"; --^C  ETX
++                                            {{when}} x"23" => ascii <= x"04"; --^D  EOT
++                                            {{when}} x"24" => ascii <= x"05"; --^E  ENQ
++                                            {{when}} x"2B" => ascii <= x"06"; --^F  ACK
++                                            {{when}} x"34" => ascii <= x"07"; --^G  BEL
++                                            {{when}} x"33" => ascii <= x"08"; --^H  BS
++                                            {{when}} x"43" => ascii <= x"09"; --^I  HT
++                                            {{when}} x"3B" => ascii <= x"0A"; --^J  LF
++                                            {{when}} x"42" => ascii <= x"0B"; --^K  VT
++                                            {{when}} x"4B" => ascii <= x"0C"; --^L  FF
++                                            {{when}} x"3A" => ascii <= x"0D"; --^M  CR
++                                            {{when}} x"31" => ascii <= x"0E"; --^N  SO
++                                            {{when}} x"44" => ascii <= x"0F"; --^O  SI
++                                            {{when}} x"4D" => ascii <= x"10"; --^P  DLE
++                                            {{when}} x"15" => ascii <= x"11"; --^Q  DC1
++                                            {{when}} x"2D" => ascii <= x"12"; --^R  DC2
++                                            {{when}} x"1B" => ascii <= x"13"; --^S  DC3
++                                            {{when}} x"2C" => ascii <= x"14"; --^T  DC4
++                                            {{when}} x"3C" => ascii <= x"15"; --^U  NAK
++                                            {{when}} x"2A" => ascii <= x"16"; --^V  SYN
++                                            {{when}} x"1D" => ascii <= x"17"; --^W  ETB
++                                            {{when}} x"22" => ascii <= x"18"; --^X  CAN
++                                            {{when}} x"35" => ascii <= x"19"; --^Y  EM
++                                            {{when}} x"1A" => ascii <= x"1A"; --^Z  SUB
++                                            {{when}} x"54" => ascii <= x"1B"; --^[  ESC
++                                            {{when}} x"5D" => ascii <= x"1C"; --^\\  FS
++                                            {{when}} x"5B" => ascii <= x"1D"; --^]  GS
++                                            {{when}} x"36" => ascii <= x"1E"; --^^  RS
++                                            {{when}} x"4E" => ascii <= x"1F"; --^_  US
++                                            {{when}} x"4A" => ascii <= x"7F"; --^?  DEL
++                                            {{when}} {{others}} => {{null}};
++                                        {{end}} {{case}};
++                                    {{else}} --if control keys are not pressed
++
++                                        --translate characters that do not depend on shift, or caps lock
++                                        {{case}} ps2_code {{is}}
++                                            {{when}} x"29" => ascii <= x"20"; --space
++                                            {{when}} x"66" => ascii <= x"08"; --backspace (BS control code)
++                                            {{when}} x"0D" => ascii <= x"09"; --tab (HT control code)
++                                            {{when}} x"5A" => ascii <= x"0D"; --enter (CR control code)
++                                            {{when}} x"76" => ascii <= x"1B"; --escape (ESC control code)
++                                            {{when}} x"71" =>
++                                                {{if}} (e0_code = '1') {{then}} --ps2 code for delete is a multi-key code
++                                                    ascii <= x"7F"; --delete
++                                                {{end}} {{if}};
++                                            {{when}} {{others}} => {{null}};
++                                        {{end}} {{case}};
++
++                                        --translate letters (these depend on both shift and caps lock)
++                                        {{if}} ((shift_r = '0' {{and}} shift_l = '0' {{and}} caps_lock = '0') {{or}}
++                                            ((shift_r = '1' {{or}} shift_l = '1') {{and}} caps_lock = '1')) {{then}} --letter is lowercase
++                                            {{case}} ps2_code {{is}}
++                                                {{when}} x"1C" => ascii <= x"61"; --a
++                                                {{when}} x"32" => ascii <= x"62"; --b
++                                                {{when}} x"21" => ascii <= x"63"; --c
++                                                {{when}} x"23" => ascii <= x"64"; --d
++                                                {{when}} x"24" => ascii <= x"65"; --e
++                                                {{when}} x"2B" => ascii <= x"66"; --f
++                                                {{when}} x"34" => ascii <= x"67"; --g
++                                                {{when}} x"33" => ascii <= x"68"; --h
++                                                {{when}} x"43" => ascii <= x"69"; --i
++                                                {{when}} x"3B" => ascii <= x"6A"; --j
++                                                {{when}} x"42" => ascii <= x"6B"; --k
++                                                {{when}} x"4B" => ascii <= x"6C"; --l
++                                                {{when}} x"3A" => ascii <= x"6D"; --m
++                                                {{when}} x"31" => ascii <= x"6E"; --n
++                                                {{when}} x"44" => ascii <= x"6F"; --o
++                                                {{when}} x"4D" => ascii <= x"70"; --p
++                                                {{when}} x"15" => ascii <= x"71"; --q
++                                                {{when}} x"2D" => ascii <= x"72"; --r
++                                                {{when}} x"1B" => ascii <= x"73"; --s
++                                                {{when}} x"2C" => ascii <= x"74"; --t
++                                                {{when}} x"3C" => ascii <= x"75"; --u
++                                                {{when}} x"2A" => ascii <= x"76"; --v
++                                                {{when}} x"1D" => ascii <= x"77"; --w
++                                                {{when}} x"22" => ascii <= x"78"; --x
++                                                {{when}} x"35" => ascii <= x"79"; --y
++                                                {{when}} x"1A" => ascii <= x"7A"; --z
++                                                {{when}} {{others}} => {{null}};
++                                            {{end}} {{case}};
++                                        {{else}} --letter is uppercase
++                                            {{case}} ps2_code {{is}}
++                                                {{when}} x"1C" => ascii <= x"41"; --A
++                                                {{when}} x"32" => ascii <= x"42"; --B
++                                                {{when}} x"21" => ascii <= x"43"; --C
++                                                {{when}} x"23" => ascii <= x"44"; --D
++                                                {{when}} x"24" => ascii <= x"45"; --E
++                                                {{when}} x"2B" => ascii <= x"46"; --F
++                                                {{when}} x"34" => ascii <= x"47"; --G
++                                                {{when}} x"33" => ascii <= x"48"; --H
++                                                {{when}} x"43" => ascii <= x"49"; --I
++                                                {{when}} x"3B" => ascii <= x"4A"; --J
++                                                {{when}} x"42" => ascii <= x"4B"; --K
++                                                {{when}} x"4B" => ascii <= x"4C"; --L
++                                                {{when}} x"3A" => ascii <= x"4D"; --M
++                                                {{when}} x"31" => ascii <= x"4E"; --N
++                                                {{when}} x"44" => ascii <= x"4F"; --O
++                                                {{when}} x"4D" => ascii <= x"50"; --P
++                                                {{when}} x"15" => ascii <= x"51"; --Q
++                                                {{when}} x"2D" => ascii <= x"52"; --R
++                                                {{when}} x"1B" => ascii <= x"53"; --S
++                                                {{when}} x"2C" => ascii <= x"54"; --T
++                                                {{when}} x"3C" => ascii <= x"55"; --U
++                                                {{when}} x"2A" => ascii <= x"56"; --V
++                                                {{when}} x"1D" => ascii <= x"57"; --W
++                                                {{when}} x"22" => ascii <= x"58"; --X
++                                                {{when}} x"35" => ascii <= x"59"; --Y
++                                                {{when}} x"1A" => ascii <= x"5A"; --Z
++                                                {{when}} {{others}} => {{null}};
++                                            {{end}} {{case}};
++                                        {{end}} {{if}};
++
++                                        --translate numbers and symbols (these depend on shift but not caps lock)
++                                        {{if}} (shift_l = '1' {{or}} shift_r = '1') {{then}} --key's secondary character is desired
++                                            {{case}} ps2_code {{is}}
++                                                {{when}} x"16" => ascii <= x"21"; --!
++                                                {{when}} x"52" => ascii <= x"22"; --"
++                                                {{when}} x"26" => ascii <= x"23"; --#
++                                                {{when}} x"25" => ascii <= x"24"; --$
++                                                {{when}} x"2E" => ascii <= x"25"; --%
++                                                {{when}} x"3D" => ascii <= x"26"; --&
++                                                {{when}} x"46" => ascii <= x"28"; --(
++                                                {{when}} x"45" => ascii <= x"29"; --)
++                                                {{when}} x"3E" => ascii <= x"2A"; --*
++                                                {{when}} x"55" => ascii <= x"2B"; --+
++                                                {{when}} x"4C" => ascii <= x"3A"; --:
++                                                {{when}} x"41" => ascii <= x"3C"; --<
++                                                {{when}} x"49" => ascii <= x"3E"; -->
++                                                {{when}} x"4A" => ascii <= x"3F"; --?
++                                                {{when}} x"1E" => ascii <= x"40"; --@
++                                                {{when}} x"36" => ascii <= x"5E"; --^
++                                                {{when}} x"4E" => ascii <= x"5F"; --_
++                                                {{when}} x"54" => ascii <= x"7B"; --{
++                                                {{when}} x"5D" => ascii <= x"7C"; --|
++                                                {{when}} x"5B" => ascii <= x"7D"; --}
++                                                {{when}} x"0E" => ascii <= x"7E"; --~
++                                                {{when}} {{others}} => {{null}};
++                                            {{end}} {{case}};
++                                        {{else}} --key's primary character is desired
++                                            {{case}} ps2_code {{is}}
++                                                {{when}} x"45" => ascii <= x"30"; --0
++                                                {{when}} x"16" => ascii <= x"31"; --1
++                                                {{when}} x"1E" => ascii <= x"32"; --2
++                                                {{when}} x"26" => ascii <= x"33"; --3
++                                                {{when}} x"25" => ascii <= x"34"; --4
++                                                {{when}} x"2E" => ascii <= x"35"; --5
++                                                {{when}} x"36" => ascii <= x"36"; --6
++                                                {{when}} x"3D" => ascii <= x"37"; --7
++                                                {{when}} x"3E" => ascii <= x"38"; --8
++                                                {{when}} x"46" => ascii <= x"39"; --9
++                                                {{when}} x"52" => ascii <= x"27"; --'
++                                                {{when}} x"41" => ascii <= x"2C"; --,
++                                                {{when}} x"4E" => ascii <= x"2D"; ---
++                                                {{when}} x"49" => ascii <= x"2E"; --.
++                                                {{when}} x"4A" => ascii <= x"2F"; --/
++                                                {{when}} x"4C" => ascii <= x"3B"; --;
++                                                {{when}} x"55" => ascii <= x"3D"; --=
++                                                {{when}} x"54" => ascii <= x"5B"; --[
++                                                {{when}} x"5D" => ascii <= x"5C"; --\
++                                                {{when}} x"5B" => ascii <= x"5D"; --]
++                                                {{when}} x"0E" => ascii <= x"60"; --`
++                                                {{when}} {{others}} => {{null}};
++                                            {{end}} {{case}};
++                                        {{end}} {{if}};
++
++                                    {{end}} {{if}};
++
++                                    {{if}} (break = '0') {{then}} --the code is a make
++                                        state <= output; --proceed to output state
++                                    {{else}} --code is a break
++                                        state <= ready; --return to ready state to await next PS2 code
++                                    {{end}} {{if}};
++
++                                --output state: verify the code is valid and output the ASCII value
++                                {{when}} output =>
++                                    {{if}} (ascii(7) = '0') {{then}} --the PS2 code has an ASCII output
++                                        ascii_new <= '1'; --set flag indicating new ASCII output
++                                        ascii_code <= ascii(6 {{downto}} 0); --output the ASCII value
++                                    {{end}} {{if}};
++                                    state <= ready; --return to ready state to await next PS2 code
++
++                            {{end}} {{case}};
++                            {{end}} {{if}};
++                        {{end}} {{process}};
++                        """);
++        return contents;
++    }
++}

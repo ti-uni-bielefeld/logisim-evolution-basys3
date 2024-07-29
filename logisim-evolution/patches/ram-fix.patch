@@ -1,0 +1,90 @@
+diff --git a/src/main/java/com/cburch/logisim/std/memory/RamHdlGeneratorFactory.java b/src/main/java/com/cburch/logisim/std/memory/RamHdlGeneratorFactory.java
+index 51b7799c4..5551231b5 100644
+--- a/src/main/java/com/cburch/logisim/std/memory/RamHdlGeneratorFactory.java
++++ b/src/main/java/com/cburch/logisim/std/memory/RamHdlGeneratorFactory.java
+@@ -44,8 +44,10 @@ public class RamHdlGeneratorFactory extends AbstractHdlGeneratorFactory {
+     final var async = StdAttr.TRIG_HIGH.equals(trigger) || StdAttr.TRIG_LOW.equals(trigger);
+     final var ramEntries = (1 << nrOfaddressLines);
+     final var truncated = (nrOfBits % 8) != 0;
++    if (byteEnables) {
++      myWires.addWire("s_ramdataOut", nrOfBits);
++    }
+     myWires
+-        .addWire("s_ramdataOut", nrOfBits)
+         .addRegister("s_tickDelayLine", 3)
+         .addRegister("s_dataInReg", nrOfBits)
+         .addRegister("s_addressReg", nrOfaddressLines)
+@@ -119,10 +121,12 @@ public class RamHdlGeneratorFactory extends AbstractHdlGeneratorFactory {
+           .add("""
+               inputRegs : {{process}}({{clock}}, {{tick}}, address, dataIn, we, oe) {{is}}
+               {{begin}}
+-                 {{if}} (rising_edge({{clock}})) {{then}}
++                {{if}} (rising_edge({{clock}})) {{then}}
++                    {{if}} ({{tick}} = '0') {{then}}
++                        s_addressReg <= address;
++                    {{end}} {{if}};
+                     {{if}} ({{tick}} = '1') {{then}}
+                         s_dataInReg  <= dataIn;
+-                        s_addressReg <= address;
+                         s_weReg      <= we;
+                         s_oeReg      <= oe;
+               """);
+@@ -133,17 +137,17 @@ public class RamHdlGeneratorFactory extends AbstractHdlGeneratorFactory {
+       contents
+           .add("""
+                     {{end}} {{if}};
+-                 {{end}} {{if}};
++                {{end}} {{if}};
+               {{end}} {{process}} inputRegs;
+               """)
+           .empty()
+           .add("""
+               tickPipeReg : {{process}}({{clock}}) {{is}}
+               {{begin}}
+-                 {{if}} (rising_edge({{clock}})) {{then}}
+-                     s_tickDelayLine(0)          <= {{tick}};
+-                     s_tickDelayLine(2 {{downto}} 1) <= s_tickDelayLine(1 {{downto}} 0);
+-                 {{end}} {{if}};
++                {{if}} (rising_edge({{clock}})) {{then}}
++                    s_tickDelayLine(0)          <= {{tick}};
++                    s_tickDelayLine(2 {{downto}} 1) <= s_tickDelayLine(1 {{downto}} 0);
++                {{end}} {{if}};
+               {{end}} {{process}} tickPipeReg;
+               """)
+           .empty()
+@@ -178,12 +182,12 @@ public class RamHdlGeneratorFactory extends AbstractHdlGeneratorFactory {
+             .add("""
+                 mem : {{process}}({{clock}} , s_we, s_dataInReg, s_addressReg) {{is}}
+                 {{begin}}
+-                   {{if}} (rising_edge({{clock}})) {{then}}
++                  {{if}} (rising_edge({{clock}})) {{then}}
+                       {{if}} (s_we = '1') {{then}}
+-                         s_memContents(to_integer(unsigned(s_addressReg))) <= s_dataInReg;
++                        s_memContents(to_integer(unsigned(s_addressReg))) <= s_dataInReg;
+                       {{end}} {{if}};
+-                      s_ramdataOut <= s_memContents(to_integer(unsigned(s_addressReg)));
+-                   {{end}} {{if}};
++                      dataOut <= s_memContents(to_integer(unsigned(s_addressReg)));
++                  {{end}} {{if}};
+                 {{end}} {{process}} mem;
+                 """);
+       }
+@@ -206,18 +210,6 @@ public class RamHdlGeneratorFactory extends AbstractHdlGeneratorFactory {
+               .add("   {{end}} {{if}};")
+               .add("{{end}} {{process}} res{{1}};", i);
+         }
+-      } else {
+-        contents
+-            .add("""
+-                res : {{process}}({{clock}}, s_oe, s_ramdataOut) {{is}}
+-                {{begin}}
+-                   {{if}} (rising_edge({{clock}})) {{then}}
+-                      {{if}} (s_oe = '1') {{then}}
+-                        dataOut <= s_ramdataOut;
+-                      {{end}} {{if}};
+-                   {{end}} {{if}};
+-                {{end}} {{process}} res;
+-                """);
+       }
+     }
+     return contents.empty();

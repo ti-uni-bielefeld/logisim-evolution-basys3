@@ -1,0 +1,382 @@
+diff --git a/src/main/java/com/cburch/logisim/fpga/designrulecheck/CorrectLabel.java b/src/main/java/com/cburch/logisim/fpga/designrulecheck/CorrectLabel.java
+index 402785fba..1e410a22d 100644
+--- a/src/main/java/com/cburch/logisim/fpga/designrulecheck/CorrectLabel.java
++++ b/src/main/java/com/cburch/logisim/fpga/designrulecheck/CorrectLabel.java
+@@ -24,7 +24,7 @@ public class CorrectLabel {
+     if (label.isEmpty()) return label;
+     final var result = new StringBuilder();
+     if (NUMBERS.contains(label.substring(0, 1))) result.append("L_");
+-    result.append(label.replace(" ", "_").replace("-", "_"));
++    result.append(label.replace(" ", "_").replace("-", "_").replace("(", "").replace(")", ""));
+     return result.toString();
+   }
+ 
+diff --git a/src/main/java/com/cburch/logisim/std/io/Video.java b/src/main/java/com/cburch/logisim/std/io/Video.java
+index 7824a942a..8ab6d477f 100644
+--- a/src/main/java/com/cburch/logisim/std/io/Video.java
++++ b/src/main/java/com/cburch/logisim/std/io/Video.java
+@@ -39,6 +39,9 @@ import com.cburch.logisim.data.Bounds;
+ import com.cburch.logisim.data.Direction;
+ import com.cburch.logisim.data.Location;
+ import com.cburch.logisim.data.Value;
++import com.cburch.logisim.fpga.data.ComponentMapInformationContainer;
++import com.cburch.logisim.fpga.designrulecheck.CorrectLabel;
++import com.cburch.logisim.instance.StdAttr;
+ import com.cburch.logisim.prefs.AppPreferences;
+ import com.cburch.logisim.tools.ToolTipMaker;
+ import java.awt.Color;
+@@ -46,9 +49,10 @@ import java.awt.image.BufferedImage;
+ import java.awt.image.ColorModel;
+ import java.awt.image.DirectColorModel;
+ import java.awt.image.IndexColorModel;
++import java.util.ArrayList;
+ 
+ // 128 x 128 pixel LCD display with 8bpp color (byte addressed)
+-class Video extends ManagedComponent implements ToolTipMaker, AttributeListener {
++public class Video extends ManagedComponent implements ToolTipMaker, AttributeListener {
+   /**
+    * Unique identifier of the tool, used as reference in project files. Do NOT change as it will
+    * prevent project files from loading.
+@@ -100,12 +104,10 @@ class Video extends ManagedComponent implements ToolTipMaker, AttributeListener
+   public static final Attribute<Integer> SCALE_OPTION =
+       Attributes.forIntegerRange("scale", S.getter("rgbVideoScale"), 1, 8);
+ 
+-  private static final Attribute<?>[] ATTRIBUTES = {
+-    BLINK_OPTION, RESET_OPTION, COLOR_OPTION, WIDTH_OPTION, HEIGHT_OPTION, SCALE_OPTION
+-  };
+-
+   private static class Factory extends AbstractComponentFactory {
+-    private Factory() {}
++    private Factory() {
++      super(new VideoHDLGeneratorFactory(), true, false);
++    }
+ 
+     @Override
+     public String getName() {
+@@ -117,11 +119,34 @@ class Video extends ManagedComponent implements ToolTipMaker, AttributeListener
+       return S.get("rgbVideoComponent");
+     }
+ 
++    @Override
++    public String getHDLName(AttributeSet attrs) {
++      return CorrectLabel.getCorrectLabel("Video"
++          + " " + attrs.getValue(COLOR_OPTION).split(" \\(")[0]
++          + " " + attrs.getValue(WIDTH_OPTION) + "x"
++          + attrs.getValue(HEIGHT_OPTION));
++    }
++
+     @Override
+     public AttributeSet createAttributeSet() {
++      ArrayList<String> outputLabels = new ArrayList<String>();
++      outputLabels.add("Hsync");
++      outputLabels.add("Vsync");
++      for (int i = 0; i < 4; i++) {
++        outputLabels.add("R" + i);
++      }
++      for (int i = 0; i < 4; i++) {
++        outputLabels.add("G" + i);
++      }
++      for (int i = 0; i < 4; i++) {
++        outputLabels.add("B" + i);
++      }
+       return AttributeSets.fixedSet(
+-          ATTRIBUTES,
+-          new Object[] {BLINK_OPTIONS[0], RESET_OPTIONS[0], COLOR_OPTIONS[0], 128, 128, 2});
++          new Attribute[] {
++              BLINK_OPTION, RESET_OPTION, COLOR_OPTION, WIDTH_OPTION, HEIGHT_OPTION, SCALE_OPTION, StdAttr.LABEL, StdAttr.MAPINFO
++          },
++          new Object[] { BLINK_OPTIONS[0], RESET_OPTIONS[0], COLOR_OPTIONS[0], 32, 32, 4, "",
++              new ComponentMapInformationContainer(0, outputLabels.size(), 0, null, outputLabels, null) });
+     }
+ 
+     @Override
+diff --git a/src/main/java/com/cburch/logisim/std/io/VideoHDLGeneratorFactory.java b/src/main/java/com/cburch/logisim/std/io/VideoHDLGeneratorFactory.java
+new file mode 100644
+index 000000000..ecd6296bd
+--- /dev/null
++++ b/src/main/java/com/cburch/logisim/std/io/VideoHDLGeneratorFactory.java
+@@ -0,0 +1,284 @@
++package com.cburch.logisim.std.io;
++
++import java.util.Map;
++
++import com.cburch.logisim.data.AttributeSet;
++import com.cburch.logisim.fpga.designrulecheck.Netlist;
++import com.cburch.logisim.fpga.designrulecheck.netlistComponent;
++import com.cburch.logisim.fpga.hdlgenerator.AbstractHdlGeneratorFactory;
++import com.cburch.logisim.fpga.hdlgenerator.Hdl;
++import com.cburch.logisim.fpga.hdlgenerator.HdlParameters;
++import com.cburch.logisim.fpga.hdlgenerator.HdlPorts;
++import com.cburch.logisim.instance.Port;
++import com.cburch.logisim.util.LineBuffer;
++
++public class VideoHDLGeneratorFactory extends AbstractHdlGeneratorFactory {
++  // VGA Mode configuration
++  private static final int H_PIXELS = 1024;
++  private static final int H_FRONT_PORCH = 40;
++  private static final int H_SYNC_PULSE = 104;
++  private static final int H_BACK_PORCH = 144;
++  private static final boolean H_SYNC_POLARITY = false; // false for negative, true for positive
++  private static final int V_PIXELS = 600;
++  private static final int V_FRONT_PORCH = 3;
++  private static final int V_SYNC_PULSE = 10;
++  private static final int V_BACK_PORCH = 11;
++  private static final boolean V_SYNC_POLARITY = true; // false for negative, true for positive
++  private static final int CLOCK_DIVIDER_WIDTH = 1; // log_2 of clock divider
++
++  private static final int VRAM_ID = -1;
++  private static final String VRAM_STRING = "vram_type";
++
++  public VideoHDLGeneratorFactory() {
++    super();
++    getWiresPortsDuringHDLWriting = true;
++  }
++
++  @Override
++  public void getGenerationTimeWiresPorts(Netlist theNetlist, AttributeSet attrs) {
++    // calculate padding to handle different aspect ratios of the view and the vga mode
++    int h_padding = 0;
++    int v_padding = 0;
++    if (H_PIXELS * attrs.getValue(Video.HEIGHT_OPTION) > V_PIXELS * attrs.getValue(Video.WIDTH_OPTION)) {
++      h_padding = (H_PIXELS - attrs.getValue(Video.WIDTH_OPTION) * V_PIXELS / attrs.getValue(Video.HEIGHT_OPTION))
++          / 2;
++    } else if (H_PIXELS * attrs.getValue(Video.HEIGHT_OPTION) < V_PIXELS * attrs.getValue(Video.WIDTH_OPTION)) {
++      v_padding = (V_PIXELS - attrs.getValue(Video.HEIGHT_OPTION) * H_PIXELS / attrs.getValue(Video.WIDTH_OPTION))
++          / 2;
++    }
++    myParametersList
++        .add("h_pixels", -1, HdlParameters.MAP_CONSTANT, H_PIXELS - h_padding * 2)
++        .add("h_front_porch", -2, HdlParameters.MAP_CONSTANT, H_FRONT_PORCH + h_padding)
++        .add("h_sync_pulse", -3, HdlParameters.MAP_CONSTANT, H_SYNC_PULSE)
++        .add("h_back_porch", -4, HdlParameters.MAP_CONSTANT, H_BACK_PORCH + h_padding)
++        .add("h_sync_polarity", -5, HdlParameters.MAP_CONSTANT, H_SYNC_POLARITY ? 1 : 0)
++        .add("v_pixels", -6, HdlParameters.MAP_CONSTANT, V_PIXELS - v_padding * 2)
++        .add("v_front_porch", -7, HdlParameters.MAP_CONSTANT, V_FRONT_PORCH + v_padding)
++        .add("v_sync_pulse", -8, HdlParameters.MAP_CONSTANT, V_SYNC_PULSE)
++        .add("v_back_porch", -9, HdlParameters.MAP_CONSTANT, V_BACK_PORCH + v_padding)
++        .add("v_sync_polarity", -10, HdlParameters.MAP_CONSTANT, V_SYNC_POLARITY ? 1 : 0)
++        .add("clock_divider_width", -11, HdlParameters.MAP_CONSTANT, CLOCK_DIVIDER_WIDTH)
++        .add("view_width", -12, HdlParameters.MAP_INT_ATTRIBUTE, Video.WIDTH_OPTION)
++        .add("view_height", -13, HdlParameters.MAP_INT_ATTRIBUTE, Video.HEIGHT_OPTION)
++        .add("x_bits", -14, HdlParameters.MAP_LN2, Video.WIDTH_OPTION)
++        .add("y_bits", -15, HdlParameters.MAP_LN2, Video.HEIGHT_OPTION);
++    myPorts
++        .add(Port.CLOCK, HdlPorts.CLOCK, 1, Video.P_CLK)
++        .add(Port.INPUT, "clk", 1, Video.P_CLK)
++        .add(Port.INPUT, "reset", 1, Video.P_RST)
++        .add(Port.INPUT, "write_enable", 1, Video.P_WE)
++        .add(Port.INPUT, "X", getPortXWidth(attrs), Video.P_X)
++        .add(Port.INPUT, "Y", getPortYWidth(attrs), Video.P_Y)
++        .add(Port.INPUT, "data", getPortDataWidth(attrs), Video.P_DATA)
++        .add(Port.OUTPUT, "Hsync", 1, -1)
++        .add(Port.OUTPUT, "Vsync", 1, -2)
++        .add(Port.OUTPUT, "R", 4, -3)
++        .add(Port.OUTPUT, "G", 4, -4)
++        .add(Port.OUTPUT, "B", 4, -5);
++    myWires
++        .addWire("pixel_clock", 1)
++        .addWire("write_index", getPortXWidth(attrs) + getPortYWidth(attrs))
++        .addWire("read_index", getPortXWidth(attrs) + getPortYWidth(attrs))
++        .addWire("vram_out", getPortDataWidth(attrs))
++        .addWire("displ_en", 1)
++        .addWire("Hsync_buf", 1)
++        .addWire("Vsync_buf", 1)
++        .addWire("displ_en_buf", 1);
++    myTypedWires
++        .addArray(VRAM_ID, VRAM_STRING, getPortDataWidth(attrs),
++            attrs.getValue(Video.WIDTH_OPTION) * attrs.getValue(Video.HEIGHT_OPTION))
++        .addWire("vram", VRAM_ID);
++  }
++
++  @Override
++  public boolean isHdlSupportedTarget(AttributeSet attrs) {
++    return Hdl.isVhdl() && Video.RESET_ASYNC.equals(attrs.getValue(Video.RESET_OPTION))
++        && getPortDataWidth(attrs) > 0;
++  }
++
++  @Override
++  public Map<String, String> getPortMap(Netlist nets, Object mapInfo) {
++    final var map = super.getPortMap(nets, mapInfo);
++    if (!(mapInfo instanceof final netlistComponent componentInfo))
++      return map;
++    final var startIndex = componentInfo.getLocalBubbleOutputStartId();
++    map.put("Hsync", String.format("%s(%d)",
++        LOCAL_OUTPUT_BUBBLE_BUS_NAME, startIndex));
++    map.put("Vsync", String.format("%s(%d)",
++        LOCAL_OUTPUT_BUBBLE_BUS_NAME, startIndex + 1));
++    map.put("R", String.format("%s(%d DOWNTO %d)",
++        LOCAL_OUTPUT_BUBBLE_BUS_NAME, startIndex + 5, startIndex + 2));
++    map.put("G", String.format("%s(%d DOWNTO %d)",
++        LOCAL_OUTPUT_BUBBLE_BUS_NAME, startIndex + 9, startIndex + 6));
++    map.put("B", String.format("%s(%d DOWNTO %d)",
++        LOCAL_OUTPUT_BUBBLE_BUS_NAME, startIndex + 13, startIndex + 10));
++    return map;
++  }
++
++  @Override
++  public LineBuffer getModuleFunctionality(Netlist netlist, AttributeSet attrs) {
++    if (!Hdl.isVhdl()) {
++      throw new UnsupportedOperationException("Only VHDL is supported");
++    }
++    final var contents = LineBuffer.getHdlBuffer().addVhdlKeywords();
++
++    switch (attrs.getValue(Video.COLOR_OPTION)) {
++      case Video.COLOR_RGB:
++        contents.add("""
++            R <= vram_out(23 downto 20) when displ_en = '1' else "0000";
++            G <= vram_out(15 downto 12) when displ_en = '1' else "0000";
++            B <= vram_out(7 downto 4) when displ_en = '1' else "0000";
++            """);
++        break;
++      case Video.COLOR_555_RGB:
++        contents.add("""
++            R <= vram_out(14 downto 11) when displ_en = '1' else "0000";
++            G <= vram_out(9 downto 6) when displ_en = '1' else "0000";
++            B <= vram_out(4 downto 1) when displ_en = '1' else "0000";
++            """);
++        break;
++      case Video.COLOR_565_RGB:
++        contents.add("""
++            R <= vram_out(15 downto 12) when displ_en = '1' else "0000";
++            G <= vram_out(10 downto 7) when displ_en = '1' else "0000";
++            B <= vram_out(4 downto 1) when displ_en = '1' else "0000";
++            """);
++        break;
++      case Video.COLOR_111_RGB:
++        contents.add("""
++            R <= (others => vram_out(2)) when displ_en = '1' else (others => '0');
++            G <= (others => vram_out(1)) when displ_en = '1' else (others => '0');
++            B <= (others => vram_out(0)) when displ_en = '1' else (others => '0');
++            """);
++        break;
++      case Video.COLOR_GRAY4:
++        contents.add("""
++            R <= vram_out(3 downto 0) when displ_en = '1' else "0000";
++            G <= vram_out(3 downto 0) when displ_en = '1' else "0000";
++            B <= vram_out(3 downto 0) when displ_en = '1' else "0000";
++            """);
++        break;
++      default:
++        throw new IllegalStateException("Unexpected value: " + attrs.getValue(Video.COLOR_OPTION));
++    }
++    contents.add(
++        """
++            write_index(x_bits-1 downto 0)  <= X;
++            write_index(x_bits+y_bits-1 downto x_bits) <= Y;
++
++            process (clock)
++              variable clock_counter : INTEGER range 0 to 2 ** (clock_divider_width - 1) - 1 := 0;
++            begin
++              if clock_divider_width = 0 then
++                pixel_clock <= clock;
++              else
++                if rising_edge(clock) then
++                  if clock_counter = 2 ** (clock_divider_width - 1) - 1 then
++                    pixel_clock <= not pixel_clock;
++                    clock_counter := 0;
++                  else
++                    clock_counter := clock_counter + 1;
++                  end if;
++                end if;
++              end if;
++            end process;
++
++            process (clock)
++            begin
++              if rising_edge(clock) then
++                if (tick = '1' and write_enable = '1') then
++                  vram(to_integer(unsigned(write_index))) <= data;
++                end if;
++              end if;
++            end process;
++
++            process (pixel_clock)
++            begin
++              if rising_edge(pixel_clock) then
++                vram_out <= vram(to_integer(unsigned(read_index)));
++              end if;
++            end process;
++
++            process (pixel_clock, reset)
++              constant h_total : INTEGER := h_back_porch + h_front_porch + h_pixels + h_sync_pulse;
++              constant v_total : INTEGER := v_back_porch + v_front_porch + v_pixels + v_sync_pulse;
++              variable h_count : INTEGER range 0 to h_total - 1 := 0;
++              variable v_count : INTEGER range 0 to v_total - 1 := 0;
++            begin
++
++              read_index(x_bits-1 downto 0) <= std_logic_vector(to_unsigned(h_count * view_width / h_pixels, x_bits));
++              read_index(x_bits+y_bits-1 downto x_bits) <= std_logic_vector(to_unsigned(v_count * view_height / v_pixels, y_bits));
++
++              if (reset = '1') then
++                h_count := 0;
++                v_count := 0;
++                Hsync <= not to_unsigned(h_sync_polarity, 1)(0);
++                Hsync_buf <= not to_unsigned(h_sync_polarity, 1)(0);
++                Vsync <= not to_unsigned(v_sync_polarity, 1)(0);
++                Vsync_buf <= not to_unsigned(v_sync_polarity, 1)(0);
++                displ_en <= '0';
++                displ_en_buf <= '0';
++                read_index <= (others => '0');
++              elsif rising_edge(pixel_clock) then
++                Hsync <= Hsync_buf;
++                Vsync <= Vsync_buf;
++                displ_en <= displ_en_buf;
++
++                if (h_count < h_total - 1) then
++                  h_count := h_count + 1;
++                else
++                  h_count := 0;
++                  if (v_count < v_total - 1) then
++                    v_count := v_count + 1;
++                  else
++                    v_count := 0;
++                  end if;
++                end if;
++
++                if h_count < h_pixels + h_front_porch or h_count >= h_pixels + h_front_porch + h_sync_pulse then
++                  Hsync_buf <= not to_unsigned(h_sync_polarity, 1)(0);
++                else
++                  Hsync_buf <= to_unsigned(h_sync_polarity, 1)(0);
++                end if;
++                if v_count < v_pixels + v_front_porch or v_count >= v_pixels + v_front_porch + v_sync_pulse then
++                  Vsync_buf <= not to_unsigned(v_sync_polarity, 1)(0);
++                else
++                  Vsync_buf <= to_unsigned(v_sync_polarity, 1)(0);
++                end if;
++
++                if h_count < h_pixels and v_count < v_pixels then
++                  displ_en_buf <= '1';
++                else
++                  displ_en_buf <= '0';
++                end if;
++              end if;
++            end process;
++            """);
++    return contents;
++  }
++
++  private static int getPortXWidth(AttributeSet attrs) {
++    return Integer.SIZE - Integer.numberOfLeadingZeros(attrs.getValue(Video.WIDTH_OPTION) - 1);
++  }
++
++  private static int getPortYWidth(AttributeSet attrs) {
++    return Integer.SIZE - Integer.numberOfLeadingZeros(attrs.getValue(Video.HEIGHT_OPTION) - 1);
++  }
++
++  private static int getPortDataWidth(AttributeSet attrs) {
++    switch (attrs.getValue(Video.COLOR_OPTION)) {
++      case Video.COLOR_RGB:
++        return 24;
++      case Video.COLOR_555_RGB:
++        return 15;
++      case Video.COLOR_565_RGB:
++        return 16;
++      case Video.COLOR_111_RGB:
++        return 3;
++      case Video.COLOR_GRAY4:
++        return 4;
++      default:
++        return -1;
++    }
++  }
++}
