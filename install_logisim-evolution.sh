@@ -13,7 +13,7 @@ if [ ! -d "$VIVADO_PATH" ]; then
     exit 1
 fi
 NEWEST_VIVADO=$(ls -r $VIVADO_PATH | head -n 1)
-VIVADO_BIN_PATH=$(realpath $VIVADO_PATH/$NEWEST_VIVADO/bin)
+VIVADO_BIN_PATH=$(realpath $VIVADO_PATH/$NEWEST_VIVADO/bin)/
 
 # check if JAVA_HOME is set
 if [ -z "$JAVA_HOME" ]; then
