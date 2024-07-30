@@ -43,7 +43,7 @@ To synthesize and download a circuit to the Basys3 FPGA board, follow these step
 
 1. Open the circuit in Logisim Evolution.
 2. Click on **FPGA** -> **Synthesize & Download**.
-3. Enter the clock frequency you want the circuit to run at in the **Clock settings** section. (You can see what clock frequency the circuit runs at in the simulation by going to **File** -> **Preferences** -> **Window** and ticking **Show tick rate**.)
+3. Enter the clock frequency you want the circuit to run at in the **Clock settings** section. (You can see what clock frequency the circuit runs at in the simulation by going to **File** -> **Preferences** -> **Window** and ticking **Show tick rate**. The shown tick rate is half of what needs to be set as the clock frequency.)
 4. In the section **Annotation method** select **Label only the components without a label** in the dropdown and click on **Annotate**. This will label all components that are not already labeled with a name, which is necessary for the synthesis.
 5. In the section **Action method**, select the desired circuit as the **Toplevel** and select **Synthesize & Download** in the dropdown menu.
 6. Click on **Execute**.
