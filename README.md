@@ -31,8 +31,8 @@ $ ./logisim-evolution/run.sh
 For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](USER_MANUAL.md).
 
 ## Updating
-To update Logisim Evolution, pull the latest changes from the repository and run the install script again:
+To update Logisim Evolution, simply run the install script again:
 ```bash
-$ git pull
 $ ./install_logisim-evolution.sh
 ```
+This also updates this repository to the newest version.

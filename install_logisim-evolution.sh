@@ -2,10 +2,13 @@
 
 set -e # exit on error
 
-TMP_GIT_REPO_DIR="${TMPDIR:-/tmp}/tmp-logisim-evolution-git-repo"
+# get latest changes of this repo
+git pull
+
 ORIG_DIR=$(pwd)
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 INSTALL_PATH=$(realpath $SCRIPT_DIR/logisim-evolution)
+GIT_REPO_DIR=$INSTALL_PATH/git_repo
 
 VIVADO_PATH=$SCRIPT_DIR/Xilinx/Vivado
 # check if vivado is installed
@@ -24,12 +27,25 @@ fi
 NEWEST_JAVA=$(ls -r $JAVA_PATH | head -n 1)
 JAVA_HOME=$(realpath $JAVA_PATH/$NEWEST_JAVA)
 
+# check java version
+JAVA_VERSION=$($JAVA_HOME/bin/java -version 2>&1 | head -n 1 | cut -d '"' -f 2)
+if [[ "$JAVA_VERSION" < "21" ]]; then
+    echo "Java version $JAVA_VERSION is not supported. Please run install_java.sh to install a supported Java version."
+    exit 1
+fi
+
 echo "Installing logisim-evolution to $INSTALL_PATH"
 
-rm -rf $TMP_GIT_REPO_DIR
-echo "Cloning into temporary directory '$TMP_GIT_REPO_DIR'..."
-git clone --depth 1 https://github.com/logisim-evolution/logisim-evolution $TMP_GIT_REPO_DIR
-cd $TMP_GIT_REPO_DIR
+# clone if repo dir doesn't exist or is empty
+if [ ! -d "$GIT_REPO_DIR" ] || [ ! "$(ls -A $GIT_REPO_DIR)" ]; then
+    echo "Cloning into directory '$GIT_REPO_DIR'..."
+    git clone --depth 1 https://github.com/logisim-evolution/logisim-evolution $GIT_REPO_DIR
+fi
+cd $GIT_REPO_DIR
+# clean repo and pull latest changes
+git reset --hard
+git clean -fd
+git pull
 echo "Applying patches..."
 PATCH_DIR=$INSTALL_PATH/patches
 PATCHES=$(ls $PATCH_DIR/*.patch 2>/dev/null || true)
@@ -43,7 +59,5 @@ echo "Building Logisim..."
 JAVA_HOME=$JAVA_HOME ./gradlew shadowJar
 cp build/libs/logisim-evolution-*.jar $INSTALL_PATH/logisim-evolution.jar
 cd $ORIG_DIR
-echo "Cleaning up..."
-rm -rf $TMP_GIT_REPO_DIR
 
 echo "Successfully installed logisim-evolution to $INSTALL_PATH"
