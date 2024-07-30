@@ -1,5 +1,5 @@
 diff --git a/src/main/java/com/cburch/logisim/prefs/AppPreferences.java b/src/main/java/com/cburch/logisim/prefs/AppPreferences.java
-index 8944f0d67..150fe9058 100644
+index 8944f0d67..cd6b41c0c 100644
 --- a/src/main/java/com/cburch/logisim/prefs/AppPreferences.java
 +++ b/src/main/java/com/cburch/logisim/prefs/AppPreferences.java
 @@ -52,6 +52,7 @@ import javax.swing.JMenuItem;
@@ -10,12 +10,17 @@ index 8944f0d67..150fe9058 100644
    //
    // LocalePreference
    //
-@@ -798,7 +799,7 @@ public class AppPreferences {
+@@ -798,7 +799,12 @@ public class AppPreferences {
    public static final PrefMonitor<String> ISEToolPath =
        create(new PrefMonitorString("ISEToolPath", ""));
    public static final PrefMonitor<String> VivadoToolPath =
 -      create(new PrefMonitorString("VivadoToolPath", ""));
 +      create(new PrefMonitorString("VivadoToolPath", DEFAULT_VIVADO_TOOL_PATH));
++  static {
++    if (!DEFAULT_VIVADO_TOOL_PATH.isEmpty()) {
++      VivadoToolPath.set(DEFAULT_VIVADO_TOOL_PATH);
++    }
++  }
    public static final PrefMonitor<String> OpenFpgaToolPath =
        create(new PrefMonitorString("OpenFpgaToolPath", ""));
  
