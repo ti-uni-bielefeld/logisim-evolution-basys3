@@ -9,8 +9,8 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
     $ git clone https://github.com/jonicho/logisim-evolution-basys3
     $ cd logisim-evolution-basys3
     ```
-2. Download the "Linux Self Extracting Web Installer" from https://www.xilinx.com/support/download.html (requires a free account)
-3. Install Vivado by running the install script and providing the path to the downloaded installer:
+2. Download the "Linux Self Extracting Web Installer" from https://www.xilinx.com/support/download.html (requires an account)
+3. Install Vivado by running the install script and providing the path to the downloaded installer (requires an account):
     ```bash
     $ ./install_vivado.sh <path to Vivado installer>
     ```
@@ -24,6 +24,7 @@ After installing, you can run Logisim Evolution by running the run script in the
 ```bash
 $ ./logisim-evolution/run.sh
 ```
+For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](USER_MANUAL.md).
 
 ## Updating
 To update Logisim Evolution, pull the latest changes from the repository and run the install script again:
