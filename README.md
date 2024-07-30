@@ -36,6 +36,9 @@ $ ./logisim-evolution/run.sh
 ```
 For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](USER_MANUAL.md).
 
+## Example
+An example circuit that demonstrates the usage of the Basys3 board and the Keyboard and Video components can be found in the `example.circ` file. Simply run Logisim Evolution as described above and open the `example.circ` file and follow the instructions in the User Manual to synthesize and download the circuit to the Basys3 FPGA board.
+
 ## Updating
 To update Logisim Evolution, simply run the install script again:
 ```bash
