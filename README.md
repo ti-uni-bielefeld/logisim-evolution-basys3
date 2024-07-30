@@ -14,7 +14,11 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
     ```bash
     $ ./install_vivado.sh <path to Vivado installer>
     ```
-4. Install Logisim Evolution by running the install script:
+4. Install Java by running the install script:
+    ```bash
+    $ ./install_java.sh
+    ```
+5. Install Logisim Evolution by running the install script:
     ```bash
     $ ./install_logisim-evolution.sh
     ```
