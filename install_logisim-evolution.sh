@@ -40,12 +40,14 @@ echo "Installing logisim-evolution to $INSTALL_PATH"
 if [ ! -d "$GIT_REPO_DIR" ] || [ ! "$(ls -A $GIT_REPO_DIR)" ]; then
     echo "Cloning into directory '$GIT_REPO_DIR'..."
     git clone --depth 1 https://github.com/logisim-evolution/logisim-evolution $GIT_REPO_DIR
+    cd $GIT_REPO_DIR
+else
+    cd $GIT_REPO_DIR
+    # clean repo and pull latest changes
+    git reset --hard
+    git clean -fd
+    git pull
 fi
-cd $GIT_REPO_DIR
-# clean repo and pull latest changes
-git reset --hard
-git clean -fd
-git pull
 echo "Applying patches..."
 PATCH_DIR=$INSTALL_PATH/patches
 PATCHES=$(ls $PATCH_DIR/*.patch 2>/dev/null || true)
