@@ -2,8 +2,14 @@
 
 A set of scripts, manuals and patches to make synthesizing and downloading circuits from [Logisim Evolution](https://github.com/logisim-evolution/logisim-evolution) onto the [Basys3 FPGA board](https://digilent.com/reference/programmable-logic/basys-3/start) on Linux easier and more seamless.
 
-## Installation
+## Logisim Features
+Newest development version of Logisim Evolution with newest features and bug fixes with the following additional patches:
+- FPGA support for Keyboard and Video components
+- Only show Basys3 board in FPGA menu
+- Fix for asynchronous RAM
+- Automatically set Vivado tool path
 
+## Installation
 1. Clone this repository into the directory where you want to install Logisim Evolution and Vivado and change into the cloned directory:
     ```bash
     $ git clone https://github.com/jonicho/logisim-evolution-basys3
