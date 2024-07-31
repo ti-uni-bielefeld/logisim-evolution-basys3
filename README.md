@@ -47,4 +47,3 @@ $ git clean -fd
 $ git pull
 $ ./install_logisim-evolution.sh
 ```
-This also updates this repository to the newest version.
