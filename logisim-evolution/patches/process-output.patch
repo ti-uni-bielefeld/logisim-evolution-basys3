@@ -1,0 +1,13 @@
+diff --git a/src/main/java/com/cburch/logisim/fpga/download/Download.java b/src/main/java/com/cburch/logisim/fpga/download/Download.java
+index 3f6effcef..e572c7291 100644
+--- a/src/main/java/com/cburch/logisim/fpga/download/Download.java
++++ b/src/main/java/com/cburch/logisim/fpga/download/Download.java
+@@ -318,6 +318,8 @@ public class Download extends DownloadBase implements Runnable, BaseWindowListen
+     Reporter.report.print("==>");
+     Reporter.report.print("==> " + StageName);
+     Reporter.report.print("==>");
++    process.redirectErrorStream(true);
++    System.out.println("Executing: \"" + String.join(" ", process.command()) + "\" in " + process.directory());
+     synchronized (lock) {
+       executable = process.start();
+     }
