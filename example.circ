@@ -79,13 +79,6 @@
     <a name="circuit" val="main"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="downloadBoard" val="BASYS3"/>
-    <a name="downloadFrequency" val="4.0"/>
-    <a name="simulationFrequency" val="2048000.0"/>
-    <boardmap boardname="BASYS3">
-      <mc key="/Keyboard_1" pmap="525_106_0,561_106_0"/>
-      <mc key="/Video_8_Color_RGB_32x32_1" pmap="338_110_0,418_110_0,420_83_0,432_83_0,446_83_0,459_83_0,354_83_0,368_83_0,380_83_0,393_83_0,291_83_0,305_83_0,318_83_0,331_83_0"/>
-      <mc key="/reset" map="536,235"/>
-    </boardmap>
     <comp lib="0" loc="(1070,560)" name="Constant">
       <a name="value" val="0x7f7f7f"/>
       <a name="width" val="24"/>
