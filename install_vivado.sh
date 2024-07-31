@@ -4,8 +4,8 @@ set -e # exit on error
 
 # check if paths are provided
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <path_to_vivado_installer>"
-    echo "       path_to_vivado_installer: \"Linux Self Extracting Web Installer\" downloaded from https://www.xilinx.com/support/download.html"
+    echo "Usage: $0 <vivado_installer>"
+    echo "       vivado_installer: \"Linux Self Extracting Web Installer\" downloaded from https://www.xilinx.com/support/download.html"
     exit 1
 fi
 

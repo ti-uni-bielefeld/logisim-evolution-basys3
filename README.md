@@ -16,9 +16,9 @@ Newest development version of Logisim Evolution with newest features and bug fix
     $ cd logisim-evolution-basys3
     ```
 2. Download the "Linux Self Extracting Web Installer" from https://www.xilinx.com/support/download.html (requires an account)
-3. Install Vivado by running the install script and providing the path to the downloaded installer (requires an account):
+3. Install Vivado by running the install script and providing the filename to the downloaded installer (requires an account):
     ```bash
-    $ ./install_vivado.sh <path to Vivado installer>
+    $ ./install_vivado.sh <Vivado installer file>
     ```
 4. Install Java by running the install script:
     ```bash
