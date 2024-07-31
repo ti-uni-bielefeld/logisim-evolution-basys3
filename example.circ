@@ -41,7 +41,6 @@
   <lib desc="#BFH-Praktika" name="9"/>
   <lib desc="#Input/Output-Extra" name="10"/>
   <lib desc="#Soc" name="11"/>
-  <lib desc="file#../../Nextcloud/SHK/Fpga/Basys3Lib.circ" name="12"/>
   <main name="main"/>
   <options>
     <a name="gateUndefined" val="ignore"/>
