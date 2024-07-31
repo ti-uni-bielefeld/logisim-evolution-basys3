@@ -1,0 +1,37 @@
+diff --git a/src/main/java/com/cburch/logisim/fpga/data/MapListModel.java b/src/main/java/com/cburch/logisim/fpga/data/MapListModel.java
+index ab222785a..5ead67704 100644
+--- a/src/main/java/com/cburch/logisim/fpga/data/MapListModel.java
++++ b/src/main/java/com/cburch/logisim/fpga/data/MapListModel.java
+@@ -60,25 +60,15 @@ public class MapListModel extends DefaultListModel<MapListModel.MapInfo> {
+     for (var key : myMappableResources.keySet()) {
+       var map = myMappableResources.get(key);
+       if (mappedList) {
+-        if (map.isCompleteMap(false)) {
+-          var idx = getInsertionPoint(map);
+-          myItems.add(idx, new MapInfo(map.getNrOfPins() == 1 ? 0 : -1, map));
+-        } else {
+-          var idx = getInsertionPoint(map);
+-          for (var i = map.getNrOfPins() - 1; i >= 0; i--) {
+-            if (map.isMapped(i)) myItems.add(idx, new MapInfo(i, map));
+-          }
++        var idx = getInsertionPoint(map);
++        for (var i = map.getNrOfPins() - 1; i >= 0; i--) {
++          if (map.isMapped(i)) myItems.add(idx, new MapInfo(i, map));
+         }
+       } else {
+-        if (map.isNotMapped()) {
+-          var idx = getInsertionPoint(map);
+-          myItems.add(idx, new MapInfo(map.getNrOfPins() == 1 ? 0 : -1, map));
+-        } else {
+-          var idx = getInsertionPoint(map);
+-          for (var i = map.getNrOfPins() - 1; i >= 0; i--) {
+-            if (!map.isMapped(i)) {
+-              myItems.add(idx, new MapInfo(i, map));
+-            }
++        var idx = getInsertionPoint(map);
++        for (var i = map.getNrOfPins() - 1; i >= 0; i--) {
++          if (!map.isMapped(i)) {
++            myItems.add(idx, new MapInfo(i, map));
+           }
+         }
+       }
