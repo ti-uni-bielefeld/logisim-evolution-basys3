@@ -2,9 +2,6 @@
 
 set -e # exit on error
 
-# get latest changes of this repo
-git pull
-
 ORIG_DIR=$(pwd)
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 INSTALL_PATH=$(realpath $SCRIPT_DIR/logisim-evolution)
