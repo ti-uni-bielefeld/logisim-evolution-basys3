@@ -43,7 +43,6 @@ An example circuit that demonstrates the usage of the Basys3 board and the Keybo
 To update Logisim Evolution, simply clean this repository, pull the latest changes and run the install script again:
 ```bash
 $ git reset --hard
-$ git clean -fd
 $ git pull
 $ ./install_logisim-evolution.sh
 ```
