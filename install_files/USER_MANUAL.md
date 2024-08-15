@@ -4,7 +4,7 @@
 
 Since a patched version of the newest development version of Logisim Evolution is needed, don't use official releases. Instead, use the patched version provided in this repository. To start Logisim Evolution, run the run script:
 ```bash
-$ ./logisim-evolution/run.sh
+$ /path/to/logisim-evolution/run.sh
 ```
 
 ## Things to consider when designing circuits
