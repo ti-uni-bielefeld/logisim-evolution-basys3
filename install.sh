@@ -15,7 +15,7 @@ mkdir -p $1
 INSTALL_PATH=$(realpath $1)
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cp $SCRIPT_DIR/README.md $INSTALL_PATH
+cp $SCRIPT_DIR/README.md $SCRIPT_DIR/example.circ $SCRIPT_DIR/USER_MANUAL.md $INSTALL_PATH/
 
 echo "Installing Java..."
 ./install_files/install_java.sh $INSTALL_PATH/java

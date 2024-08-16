@@ -60,8 +60,6 @@ mkdir -p $INSTALL_PATH
 cp build/libs/logisim-evolution-*.jar $INSTALL_PATH/logisim-evolution.jar
 cd $ORIG_DIR
 
-echo "Copying example circuit and user manual..."
-cp $SCRIPT_DIR/example.circ $SCRIPT_DIR/USER_MANUAL.md $INSTALL_PATH/
 # set correct path to run script in user manual
 sed -i "s|/path/to/logisim-evolution/run.sh|$INSTALL_PATH/run.sh|g" $INSTALL_PATH/USER_MANUAL.md
 

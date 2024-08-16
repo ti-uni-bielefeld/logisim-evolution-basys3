@@ -31,10 +31,10 @@ After installing, you can run Logisim Evolution by running the run script in the
 ```bash
 $ ./logisim-evolution/run.sh
 ```
-For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](install_files/USER_MANUAL.md), which also gets installed into the `logisim-evolution` directory.
+For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](USER_MANUAL.md), which also gets installed into the `logisim-evolution` directory.
 
 ## Example
-An example circuit that demonstrates the usage of the Basys3 board and the Keyboard and Video components can be found in the `example.circ` file in the installed `logisim-evolution` directory. Simply run Logisim Evolution as described above and open the `example.circ` file and follow the instructions in the [User Manual](install_files/USER_MANUAL.md) to synthesize and download the circuit to the Basys3 FPGA board.
+An example circuit that demonstrates the usage of the Basys3 board and the Keyboard and Video components can be found in the `example.circ` file in the installed `logisim-evolution` directory. Simply run Logisim Evolution as described above and open the `example.circ` file and follow the instructions in the [User Manual](USER_MANUAL.md) to synthesize and download the circuit to the Basys3 FPGA board.
 
 ## Updating
 To update Logisim Evolution, simply follow the installation instructions again. The installation script will detect if Java or Vivado are already installed and only reinstall Logisim Evolution.
