@@ -45,12 +45,12 @@ To synthesize and download a circuit to the Basys3 FPGA board, follow these step
 2. Click on **FPGA** -> **Synthesize & Download**.
 3. Enter the clock frequency you want the circuit to run at in the **Clock settings** section. (The divider updates automatically for the entered clock frequency.)
 
-    You can see what clock frequency the circuit runs at in the simulation by going to **File** -> **Preferences** -> **Window** and ticking **Show tick rate**. The shown tick rate is half of what needs to be set as the clock frequency.
+    You can see what clock frequency the circuit runs at in the simulation by going to **File** -> **Preferences** -> **Window** and ticking **Show tick rate**. The shown tick rate is half of what needs to be set as the clock frequency in order to run the circuit at the same speed on the Basys3 board.
 4. In the section **Annotation method** select **Label only the components without a label** in the dropdown and click on **Annotate**. This will label all components that are not already labeled with a name, which is necessary for the synthesis.
 5. In the section **Action method**, select the desired circuit as the **Toplevel** and select **Synthesize & Download** in the dropdown menu.
 6. Click on **Execute**.
 7. Now a window to map input and output components to the Basys3 board will open. 
-8. Click on an unmapped component on the left and then click on the corresponding component on the Basys3 board you want to map it to on the picture on the bottom. Repeat this for all components and click on **Done**.
+8. Click on an unmapped component in the list at the top left and then click on the rectangle in the image of the board belonging to the corresponding component you want to map it to. The component will then be moved into the mapped component list on the right. Repeat this for all components and click on **Done**.
 9. When the circuit was successfully synthesized a dialog will open asking for confirmation to download the circuit to the Basys3 board. Click on **Yes, download** after making sure the Basys3 board is connected to the computer and turned on.
 
 **Note:** Even if the circuit was successfully downloaded to the Basys3 board, Logisim may still display an error message. This can be ignored if the circuit runs correctly on the Basys3 board.
