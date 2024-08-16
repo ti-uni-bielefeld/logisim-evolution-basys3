@@ -51,12 +51,7 @@ cd $TMP_GIT_REPO_DIR
 git reset --hard 2d5f2a84775a5c4ca6d431fa7b6415fca020902b
 
 echo "Applying patches..."
-PATCH_DIR=$SCRIPT_DIR/logisim-evolution-patches
-PATCHES=$(ls $PATCH_DIR/*.patch 2>/dev/null || true)
-for patch in $PATCHES; do
-    echo "Applying patch $(basename $patch)..."
-    git apply $patch
-done
+git apply $SCRIPT_DIR/logisim-evolution-patches/*.patch
 # set correct default vivado path
 sed -i "s|DEFAULT_VIVADO_TOOL_PATH = \"[^\"]*\"|DEFAULT_VIVADO_TOOL_PATH = \"$VIVADO_BIN_PATH\"|g" src/main/java/com/cburch/logisim/prefs/AppPreferences.java
 echo "Building Logisim..."
