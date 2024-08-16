@@ -1,3 +1,5 @@
+This patch removes the clock scaling options from the FPGA configuration dialog.
+
 diff --git a/src/main/java/com/cburch/logisim/fpga/gui/FpgaClockPanel.java b/src/main/java/com/cburch/logisim/fpga/gui/FpgaClockPanel.java
 index b8b0bf395..20c80c834 100644
 --- a/src/main/java/com/cburch/logisim/fpga/gui/FpgaClockPanel.java

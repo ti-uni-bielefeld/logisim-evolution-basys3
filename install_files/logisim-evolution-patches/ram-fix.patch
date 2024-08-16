@@ -1,3 +1,5 @@
+This patch fixes the FPGA support for the asynchronous RAM component.
+
 diff --git a/src/main/java/com/cburch/logisim/std/memory/RamHdlGeneratorFactory.java b/src/main/java/com/cburch/logisim/std/memory/RamHdlGeneratorFactory.java
 index 51b7799c4..5551231b5 100644
 --- a/src/main/java/com/cburch/logisim/std/memory/RamHdlGeneratorFactory.java

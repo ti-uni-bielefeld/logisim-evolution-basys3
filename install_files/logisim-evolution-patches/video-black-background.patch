@@ -1,3 +1,5 @@
+This patch changes the background color of the video output to black to match the output of the FPGA synthesized video component.
+
 diff --git a/src/main/java/com/cburch/logisim/std/io/Video.java b/src/main/java/com/cburch/logisim/std/io/Video.java
 index 7824a942a..a9e6e76f5 100644
 --- a/src/main/java/com/cburch/logisim/std/io/Video.java

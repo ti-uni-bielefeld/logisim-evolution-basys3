@@ -1,3 +1,5 @@
+This patch simplifies the FPGA component mapping dialog by not grouping pins.
+
 diff --git a/src/main/java/com/cburch/logisim/fpga/data/MapListModel.java b/src/main/java/com/cburch/logisim/fpga/data/MapListModel.java
 index ab222785a..5ead67704 100644
 --- a/src/main/java/com/cburch/logisim/fpga/data/MapListModel.java

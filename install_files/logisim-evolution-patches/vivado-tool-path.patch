@@ -1,3 +1,5 @@
+This patch sets the default Vivado tool path to constant that can be set while applying the patch.
+
 diff --git a/src/main/java/com/cburch/logisim/prefs/AppPreferences.java b/src/main/java/com/cburch/logisim/prefs/AppPreferences.java
 index 8944f0d67..cd6b41c0c 100644
 --- a/src/main/java/com/cburch/logisim/prefs/AppPreferences.java

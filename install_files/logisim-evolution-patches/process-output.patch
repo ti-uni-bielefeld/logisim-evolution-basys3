@@ -1,3 +1,5 @@
+This patch makes Logisim Evolution print the command it is executing to the console when downloading the bitstream to the FPGA.
+
 diff --git a/src/main/java/com/cburch/logisim/fpga/download/Download.java b/src/main/java/com/cburch/logisim/fpga/download/Download.java
 index 3f6effcef..e572c7291 100644
 --- a/src/main/java/com/cburch/logisim/fpga/download/Download.java
