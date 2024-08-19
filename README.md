@@ -15,10 +15,10 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
 ## Installation
 1. Get a copy of this repository by doing either of the following:
     - 1. Download the repository as a ZIP file with this link: https://github.com/jonicho/logisim-evolution-basys3/archive/refs/heads/main.zip
-      2. Extract it into your home directory and change into the extracted directory
+      2. Extract it into your home directory (not the install directory) and change into the extracted directory
 
    Or
-    - Clone this repository into your home directory and change into the cloned directory:
+    - Clone this repository into your home directory (not the install directory) and change into the cloned directory:
         ```bash
         $ git clone https://github.com/jonicho/logisim-evolution-basys3
         $ cd logisim-evolution-basys3
