@@ -30,6 +30,13 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
     ```
     Note: When updating or when Vivado is already install for another reason, providing the vivado installer file is optional.
 
+### Error when downloading to the Basys3 board
+
+On some systems the download to the Basys3 board may fail with the error message `There is no current hw_target.` If this is the case for you, the udev rules in `<install directory>/Xilinx/Vivado/<installed Vivado version>/data/xicom/cable_drivers/lin64/install_script/install_drivers/52-xilinx-digilent-usb.rules` need to be installed. You can do this either manually by copying that file into `/etc/udev/rules.d/` and setting the permissions to 644, or run the following script as root:
+```bash
+# <install directory>/Xilinx/Vivado/<installed Vivado version>/data/xicom/cable_drivers/lin64/install_script/install_drivers/install_digilent.sh
+```
+
 ## Updating
 To update Logisim Evolution, simply follow the installation instructions again. The installation script will detect if Java or Vivado are already installed and only reinstall Logisim Evolution.
 
