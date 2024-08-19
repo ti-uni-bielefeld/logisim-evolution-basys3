@@ -17,6 +17,9 @@ INSTALL_PATH=$(realpath $1)
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cp $SCRIPT_DIR/README.md $SCRIPT_DIR/example.circ $SCRIPT_DIR/USER_MANUAL.md $INSTALL_PATH/
 
+# set correct path to run script in user manual
+sed -i "s|/path/to/logisim-evolution/run.sh|$INSTALL_PATH/logisim-evolution/run.sh|g" $INSTALL_PATH/USER_MANUAL.md
+
 echo "Installing Java..."
 ./install_files/install_java.sh $INSTALL_PATH/java
 

@@ -60,9 +60,6 @@ mkdir -p $INSTALL_PATH
 cp build/libs/logisim-evolution-*.jar $INSTALL_PATH/logisim-evolution.jar
 cd $ORIG_DIR
 
-# set correct path to run script in user manual
-sed -i "s|/path/to/logisim-evolution/run.sh|$INSTALL_PATH/run.sh|g" $INSTALL_PATH/USER_MANUAL.md
-
 echo "Setting up run script..."
 echo "#!/bin/bash" > $INSTALL_PATH/run.sh
 echo "$JAVA_HOME/bin/java -jar $INSTALL_PATH/logisim-evolution.jar" >> $INSTALL_PATH/run.sh
