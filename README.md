@@ -13,15 +13,18 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
     - Automatically set Vivado tool path
 
 ## Installation
-1. Get a copy of this repository by either:
+1. Get a copy of this repository by doing either of the following:
+    - 1. Download the repository as a ZIP file with this link: https://github.com/jonicho/logisim-evolution-basys3/archive/refs/heads/main.zip
+      2. Extract it into your home directory and change into the extracted directory
+
+   Or
     - Clone this repository into your home directory and change into the cloned directory:
         ```bash
         $ git clone https://github.com/jonicho/logisim-evolution-basys3
         $ cd logisim-evolution-basys3
         ```
-    - Download the repository as a ZIP file and extract it into your home directory and change into the extracted directory.
-2. Download the "Linux Self Extracting Web Installer" from https://www.xilinx.com/support/download.html (requires an account)
-3. Run the install script and provide the filename to the downloaded installer and the directory where you want to install Java, Vivado and Logisim Evolution:
+3. Download the "Linux Self Extracting Web Installer" from https://www.xilinx.com/support/download.html (requires an account)
+4. Run the install script and provide the filename to the downloaded installer and the directory where you want to install Java, Vivado and Logisim Evolution:
     ```bash
     $ ./install.sh <Install directory> <Vivado installer file>
     ```
