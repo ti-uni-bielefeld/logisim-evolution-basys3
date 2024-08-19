@@ -23,12 +23,12 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
         $ git clone https://github.com/jonicho/logisim-evolution-basys3
         $ cd logisim-evolution-basys3
         ```
-3. Download the "Linux Self Extracting Web Installer" from https://www.xilinx.com/support/download.html (requires an account)
+3. Download the "Linux Self Extracting Web Installer" from https://www.xilinx.com/support/download.html (requires an account) (not necessary if Vivado is already installed)
 4. Run the install script and provide the filename to the downloaded installer and the directory where you want to install Java, Vivado and Logisim Evolution:
     ```bash
-    $ ./install.sh <Install directory> <Vivado installer file>
+    $ ./install.sh <Install directory> [Vivado installer file]
     ```
-    Note: When updating, providing the vivado installer file is optional.
+    Note: When updating or when Vivado is already install for another reason, providing the vivado installer file is optional.
 
 ## Updating
 To update Logisim Evolution, simply follow the installation instructions again. The installation script will detect if Java or Vivado are already installed and only reinstall Logisim Evolution.
