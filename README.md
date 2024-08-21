@@ -24,11 +24,13 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
         $ cd logisim-evolution-basys3
         ```
 3. Download the "Linux Self Extracting Web Installer" from https://www.xilinx.com/support/download.html (requires an account) (not necessary if Vivado is already installed)
-4. Run the install script and provide the filename to the downloaded installer and the directory where you want to install Java, Vivado and Logisim Evolution:
+4. Run the install script:
     ```bash
-    $ ./install.sh <Install directory> [Vivado installer file]
+    $ ./install.sh <install directory> [Vivado installer file]
     ```
-    Note: When updating or when Vivado is already install for another reason, providing the vivado installer file is optional.
+    Where `<install directory>` is the directory where Java, Vivado and Logisim Evolution will be installed (e.g. `/etc/opt/logisim-evolution-basys3`) and `[Vivado installer file]` is the path to the downloaded Vivado installer file (e.g. `~/Downloads/FPGAs_AdaptiveSoCs_Unified_2024.1_0522_2023_Lin64.bin`).
+
+    Note: When updating or when Vivado is already installed for another reason, providing the Vivado installer file is optional.
 
 ### Error when downloading to the Basys3 board
 
@@ -43,7 +45,11 @@ To update Logisim Evolution, simply follow the installation instructions again. 
 ## Usage
 After installing, you can run Logisim Evolution by running the run script in the `logisim-evolution` directory:
 ```bash
-$ ./logisim-evolution/run.sh
+$ <install directory>/logisim-evolution/run.sh
+```
+For example:
+```bash
+$ /etc/opt/logisim-evolution-basys3/logisim-evolution/run.sh
 ```
 For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](USER_MANUAL.md), which also gets installed into the `logisim-evolution` directory.
 
