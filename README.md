@@ -32,11 +32,25 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
 
     Note: When updating or when Vivado is already installed for another reason, providing the Vivado installer file is optional.
 
-### Error when downloading to the Basys3 board
+### Common Errors
 
-On some systems the download to the Basys3 board may fail with the error message `There is no current hw_target.` If this is the case for you, the udev rules in `<install directory>/Xilinx/Vivado/<installed Vivado version>/data/xicom/cable_drivers/lin64/install_script/install_drivers/52-xilinx-digilent-usb.rules` need to be installed. You can do this either manually by copying that file into `/etc/udev/rules.d/` and setting the permissions to 644, or run the following script as root:
+#### Error when downloading to the Basys3 board
+
+On some systems the download to the Basys3 board may fail with the error message `There is no current hw_target.` If this is the case for you, the udev rules in `<install directory>/Xilinx/Vivado/<installed Vivado version>/data/xicom/cable_drivers/lin64/install_script/install_drivers/52-xilinx-digilent-usb.rules` need to be installed. You can do this either manually by copying that file into `/etc/udev/rules.d/` and setting the permissions to 644, or run the install script as root:
 ```bash
-# <install directory>/Xilinx/Vivado/<installed Vivado version>/data/xicom/cable_drivers/lin64/install_script/install_drivers/install_digilent.sh
+$ sudo <install directory>/Xilinx/Vivado/<installed Vivado version>/data/xicom/cable_drivers/lin64/install_script/install_drivers/install_digilent.sh
+```
+
+#### Error when Creating Vivado project
+
+On some systems the following error may occur when Logisim Evolution tries to create a Vivado project:
+```
+application-specific initialization failed: couldn't load file "librdi_commontasks.so": libtinfo.so.5: cannot open shared object file: No such file or directory
+```
+
+This error can be fixed by installing the `libtinfo5` package:
+```bash
+$ sudo apt install libtinfo5
 ```
 
 ## Updating
