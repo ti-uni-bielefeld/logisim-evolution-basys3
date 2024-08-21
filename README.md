@@ -7,7 +7,7 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
 - Script to start Logisim Evolution
 - User Manual with instructions on how to synthesize and download circuits to the Basys3 FPGA board
 - Additional patches onto Logisim Evolution 3.9.0 to make it easier to synthesize and download circuits to the Basys3 FPGA board. These patches include:
-    - FPGA support for Keyboard and Video components
+    - FPGA support for Keyboard and Video components (see [Keyboard and Video components](#keyboard-and-video-components))
     - Only show Basys3 board in FPGA menu
     - Fix for asynchronous RAM
     - Automatically set Vivado tool path
@@ -69,3 +69,25 @@ For more information on how to synthesize and download circuits to the Basys3 FP
 
 ## Example
 An example circuit that demonstrates the usage of the Basys3 board and the Keyboard and Video components can be found in the `example.circ` file in the installed `logisim-evolution` directory. Simply run Logisim Evolution as described above and open the `example.circ` file and follow the instructions in the [User Manual](USER_MANUAL.md) to synthesize and download the circuit to the Basys3 FPGA board.
+
+## Keyboard and Video components
+
+The Keyboard and Video components are not supported for synthesis by stock Logisim Evolution, so they have been patched to be supported. 
+
+### Keyboard component
+
+The FPGA support for the Keyboard component is implemented to accept a PS/2 keyboard input. The Keyboard works exactly the same on an FPGA as it does in simulation. It can be mapped to the internal PS/2 controller of the Basys3 board to use it with a USB keyboard connected to the Basys3 board.
+
+### Video component
+
+The FPGA support for the Video component is implemented to output a VGA signal (1024x600 at 61Hz). Some functions of the Video component are not supported on the FPGA, which are:
+- There is no cursor on the VGA output, regardless of the cursor setting in the Video component.
+- The reset input does not do anything, as the RAM on the FPGA cannot be reset all at once. Instead, the display has to be manually cleared by writing to Video component.
+- Only the following color models are supported:
+    - 888 RGB (24 bit)
+    - 555 RGB (15 bit)
+    - 565 RGB (16 bit)
+    - 8-Color RGB (3 bit)
+    - Grayscale (4 bit)
+
+The Video component can be mapped to the internal VGA controller of the Basys3 board to use it with a VGA monitor connected to the Basys3 board.
