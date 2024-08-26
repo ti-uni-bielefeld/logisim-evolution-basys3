@@ -6,22 +6,23 @@ set -e # exit on error
 if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
     echo "Usage: $0 <install_dir> [vivado_installer]"
     echo "       install_dir: Xilinx directory to install Vivado to"
-    echo "       vivado_installer: \"Linux Self Extracting Web Installer\" downloaded from https://www.xilinx.com/support/download.html"
+    echo "       vivado_installer: Vivado 2023.2 installer downloaded from https://www.xilinx.com/member/forms/download/xef.html?filename=FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256_Lin64.bin"
     echo "                         This is optional if Vivado is already installed"
     exit 1
 fi
 
 INSTALL_PATH=$(realpath $1)
+VIVADO_2023_2_PATH=$(realpath $INSTALL_PATH/Vivado/2023.2)
 
 # check if vivado is already installed by checking if Vivado directory exists and is not empty
-if [ -d "$INSTALL_PATH" ] && [ "$(ls -A $INSTALL_PATH)" ]; then
-    echo "Detected existing Vivado installation in $INSTALL_PATH, skipping installation."
+if [ -d "$VIVADO_2023_2_PATH" ] && [ "$(ls -A $VIVADO_2023_2_PATH)" ]; then
+    echo "Detected existing Vivado 2023.2 installation in $INSTALL_PATH, skipping installation."
     exit 0
 fi
 
 # check if vivado installer is provided
 if [ "$#" -ne 2 ]; then
-    echo "Vivado installer not provided. Please download \"Linux Self Extracting Web Installer\" from https://www.xilinx.com/support/download.html"
+    echo "Vivado installer not provided. Please download the Vivado 2023.2 installer from https://www.xilinx.com/member/forms/download/xef.html?filename=FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256_Lin64.bin"
     exit 1
 fi
 

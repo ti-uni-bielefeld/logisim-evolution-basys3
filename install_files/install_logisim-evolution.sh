@@ -13,6 +13,7 @@ fi
 
 INSTALL_PATH=$(realpath $1)
 VIVADO_PATH=$(realpath $2/Vivado)
+VIVADO_BIN_PATH=$(realpath $VIVADO_PATH/2023.2/bin)/
 JAVA_PATH=$(realpath $3)
 
 ORIG_DIR=$(pwd)
@@ -20,12 +21,10 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 TMP_GIT_REPO_DIR="${TMPDIR:-/tmp}/tmp-logisim-evolution-git-repo"
 
 # check if vivado is installed
-if [ ! -d "$VIVADO_PATH" ]; then
-    echo "Vivado is not installed in $VIVADO_PATH. Please run install_vivado.sh to install Vivado first."
+if [ ! -d "$VIVADO_BIN_PATH" ]; then
+    echo "Vivado 2023.2 is not installed in $VIVADO_PATH. Please run install_vivado.sh to install Vivado 2023.2 first."
     exit 1
 fi
-NEWEST_VIVADO=$(ls -r $VIVADO_PATH | head -n 1)
-VIVADO_BIN_PATH=$(realpath $VIVADO_PATH/$NEWEST_VIVADO/bin)/
 
 # check if java is installed
 if [ ! "$(ls -A $JAVA_PATH)" ]; then
