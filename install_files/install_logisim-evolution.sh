@@ -11,10 +11,10 @@ if [ "$#" -ne 3 ]; then
     exit 1
 fi
 
-INSTALL_PATH=$(realpath $1)
-VIVADO_PATH=$(realpath $2/Vivado)
-VIVADO_BIN_PATH=$(realpath $VIVADO_PATH/2023.2/bin)/
-JAVA_PATH=$(realpath $3)
+INSTALL_PATH=$1
+VIVADO_PATH=$2/Vivado
+VIVADO_BIN_PATH=$VIVADO_PATH/2023.2/bin
+JAVA_PATH=$3
 
 ORIG_DIR=$(pwd)
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -32,7 +32,7 @@ if [ ! "$(ls -A $JAVA_PATH)" ]; then
     exit 1
 fi
 NEWEST_JAVA=$(ls -r $JAVA_PATH | head -n 1)
-JAVA_HOME=$(realpath $JAVA_PATH/$NEWEST_JAVA)
+JAVA_HOME=$JAVA_PATH/$NEWEST_JAVA
 
 # check java version
 JAVA_VERSION=$($JAVA_HOME/bin/java -version 2>&1 | head -n 1 | cut -d '"' -f 2)
@@ -52,7 +52,7 @@ git reset --hard 2d5f2a84775a5c4ca6d431fa7b6415fca020902b
 echo "Applying patches..."
 git apply $SCRIPT_DIR/logisim-evolution-patches/*.patch
 # set correct default vivado path
-sed -i "s|DEFAULT_VIVADO_TOOL_PATH = \"[^\"]*\"|DEFAULT_VIVADO_TOOL_PATH = \"$VIVADO_BIN_PATH\"|g" src/main/java/com/cburch/logisim/prefs/AppPreferences.java
+sed -i "s|DEFAULT_VIVADO_TOOL_PATH = \"[^\"]*\"|DEFAULT_VIVADO_TOOL_PATH = \"$(realpath $VIVADO_BIN_PATH)\"|g" src/main/java/com/cburch/logisim/prefs/AppPreferences.java
 echo "Building Logisim..."
 JAVA_HOME=$JAVA_HOME ./gradlew shadowJar
 mkdir -p $INSTALL_PATH
@@ -61,7 +61,7 @@ cd $ORIG_DIR
 
 echo "Setting up run script..."
 echo "#!/bin/bash" > $INSTALL_PATH/run.sh
-echo "$JAVA_HOME/bin/java -jar $INSTALL_PATH/logisim-evolution.jar" >> $INSTALL_PATH/run.sh
+echo "$(realpath $JAVA_HOME/bin/java) -jar $(realpath $INSTALL_PATH/logisim-evolution.jar)" >> $INSTALL_PATH/run.sh
 chmod a+x $INSTALL_PATH/run.sh
 
 echo "Cleaning up..."

@@ -11,8 +11,8 @@ if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
     exit 1
 fi
 
-INSTALL_PATH=$(realpath $1)
-VIVADO_2023_2_PATH=$(realpath $INSTALL_PATH/Vivado/2023.2)
+INSTALL_PATH=$1
+VIVADO_2023_2_PATH=$INSTALL_PATH/Vivado/2023.2
 
 # check if vivado is already installed by checking if Vivado directory exists and is not empty
 if [ -d "$VIVADO_2023_2_PATH" ] && [ "$(ls -A $VIVADO_2023_2_PATH)" ]; then
@@ -26,7 +26,7 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-VIVADO_INSTALLER=$(realpath $2)
+VIVADO_INSTALLER=$2
 
 # check if installer exists
 if [ ! -f "$VIVADO_INSTALLER" ]; then

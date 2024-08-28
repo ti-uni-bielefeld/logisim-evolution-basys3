@@ -9,8 +9,7 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-INSTALL_PATH=$(realpath $1)
-
+INSTALL_PATH=$1
 # check if java is already installed by checking if Java directory exists and is not empty
 if [ -d "$INSTALL_PATH" ] && [ "$(ls -A $INSTALL_PATH)" ]; then
     echo "Detected existing Java installation in $INSTALL_PATH, skipping installation."

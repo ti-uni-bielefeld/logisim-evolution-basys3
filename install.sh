@@ -11,8 +11,8 @@ if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
     exit 1
 fi
 
-mkdir -p $1
-INSTALL_PATH=$(realpath $1)
+INSTALL_PATH=$1
+mkdir -p $INSTALL_PATH
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cp $SCRIPT_DIR/README.md $SCRIPT_DIR/example.circ $SCRIPT_DIR/USER_MANUAL.md $INSTALL_PATH/
@@ -25,11 +25,10 @@ echo "Installing Java..."
 
 echo "Installing Vivado..."
 # check if vivado installer is provided
-if [ "$#" -ne 2 ]; then
+if [ "$#" -lt 2 ]; then
     ./install_files/install_vivado.sh $INSTALL_PATH/Xilinx
 else
-    VIVADO_INSTALLER=$(realpath $2)
-    ./install_files/install_vivado.sh $INSTALL_PATH/Xilinx $VIVADO_INSTALLER
+    ./install_files/install_vivado.sh $INSTALL_PATH/Xilinx $2
 fi
 
 echo "Installing Logisim Evolution..."
