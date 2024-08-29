@@ -1,4 +1,4 @@
-This patch modifies the version and adds a link to the Basys3 edition repository in the about dialog.
+Modifies the version and adds a link to the Basys3 edition repository in the about dialog.
 
 diff --git a/gradle.properties b/gradle.properties
 index 68194ddc9..6bd97d8d9 100644

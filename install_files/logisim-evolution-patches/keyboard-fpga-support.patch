@@ -1,4 +1,4 @@
-This patch adds FPGA support for the Keyboard component.
+Adds FPGA support for the Keyboard component.
 
 VHDL Code modified from
 https://forum.digikey.com/t/ps-2-keyboard-to-ascii-converter-vhdl/12616

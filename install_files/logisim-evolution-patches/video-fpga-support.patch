@@ -1,3 +1,5 @@
+Adds FPGA support for the Video component.
+
 VHDL Code modified from
 https://forum.digikey.com/t/vga-controller-vhdl/12794
 (no license specified)

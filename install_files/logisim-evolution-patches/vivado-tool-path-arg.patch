@@ -1,4 +1,4 @@
-This patch adds a command line option to set the vivado tool path.
+Adds a command line option to set the vivado tool path.
 
 diff --git a/src/main/java/com/cburch/logisim/gui/start/Startup.java b/src/main/java/com/cburch/logisim/gui/start/Startup.java
 index 66277399f..285f11b3c 100644

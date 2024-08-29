@@ -1,4 +1,4 @@
-This patch fixes HDL generation such that the Video and Keyboard components get a global clock connection.
+Fixes HDL generation such that the Video and Keyboard components get a global clock connection.
 
 diff --git a/src/main/java/com/cburch/logisim/fpga/hdlgenerator/AbstractHdlGeneratorFactory.java b/src/main/java/com/cburch/logisim/fpga/hdlgenerator/AbstractHdlGeneratorFactory.java
 index 6fc6e11e2..a473f14a9 100644

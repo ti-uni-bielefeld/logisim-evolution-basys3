@@ -1,4 +1,4 @@
-This patch makes Logisim Evolution only show the Basys3 board in the board selection dialog.
+Makes Logisim Evolution only show the Basys3 board in the board selection dialog.
 
 diff --git a/src/main/java/com/cburch/logisim/fpga/settings/BoardList.java b/src/main/java/com/cburch/logisim/fpga/settings/BoardList.java
 index 880496a35..3c032a255 100644
