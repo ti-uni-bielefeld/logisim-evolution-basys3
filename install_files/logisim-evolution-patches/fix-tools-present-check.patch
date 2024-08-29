@@ -1,0 +1,15 @@
+Fixes the toolsPresent method in VendorSoftware.java to correctly check for the presence of vendor tools.
+
+diff --git a/src/main/java/com/cburch/logisim/fpga/settings/VendorSoftware.java b/src/main/java/com/cburch/logisim/fpga/settings/VendorSoftware.java
+index 2dc2bb03b..851f22c29 100644
+--- a/src/main/java/com/cburch/logisim/fpga/settings/VendorSoftware.java
++++ b/src/main/java/com/cburch/logisim/fpga/settings/VendorSoftware.java
+@@ -175,7 +175,7 @@ public class VendorSoftware {
+   public static boolean toolsPresent(char vendor, String path) {
+     String[] tools = load(vendor);
+     for (String tool : tools) {
+-      File test = new File(correctPath(path + tool));
++      File test = new File(correctPath(path) + tool);
+       if (!test.exists())
+         return false;
+     }
