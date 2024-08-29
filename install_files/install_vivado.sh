@@ -39,10 +39,13 @@ mkdir -p $INSTALL_PATH
 
 # set install path in config file
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-sed -i 's#^Destination=.*$#Destination='"$INSTALL_PATH"'#g' $SCRIPT_DIR/vivado_install_config.txt
+TMP_CONFIG_FILE=/tmp/vivado_install_config.txt
+cp $SCRIPT_DIR/vivado_install_config.txt $TMP_CONFIG_FILE
+sed -i 's#^Destination=.*$#Destination='"$INSTALL_PATH"'#g' $TMP_CONFIG_FILE
 
 # make installer executable
 chmod +x $VIVADO_INSTALLER
 
 $VIVADO_INSTALLER -- -b AuthTokenGen
-$VIVADO_INSTALLER -- -b Install -a XilinxEULA,3rdPartyEULA -c $SCRIPT_DIR/vivado_install_config.txt
+$VIVADO_INSTALLER -- -b Install -a XilinxEULA,3rdPartyEULA -c $TMP_CONFIG_FILE
+rm $TMP_CONFIG_FILE
