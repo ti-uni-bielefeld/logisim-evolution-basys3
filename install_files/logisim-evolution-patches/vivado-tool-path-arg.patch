@@ -1,0 +1,48 @@
+This patch adds a command line option to set the vivado tool path.
+
+diff --git a/src/main/java/com/cburch/logisim/gui/start/Startup.java b/src/main/java/com/cburch/logisim/gui/start/Startup.java
+index 66277399f..285f11b3c 100644
+--- a/src/main/java/com/cburch/logisim/gui/start/Startup.java
++++ b/src/main/java/com/cburch/logisim/gui/start/Startup.java
+@@ -168,6 +168,7 @@ public class Startup implements AWTEventListener {
+   private static final String ARG_TEST_VECTOR_LONG = "test-vector";
+   private static final String ARG_NO_SPLASH_LONG = "no-splash";
+   private static final String ARG_MAIN_CIRCUIT = "toplevel-circuit";
++  private static final String ARG_VIVADO_TOOL_PATH_LONG = "vivado-tool-path";
+ 
+   /**
+    * Parses provided string expecting it represent boolean option. Accepted values
+@@ -328,6 +329,7 @@ public class Startup implements AWTEventListener {
+     addOption(opts, "argTestVectorOption", ARG_TEST_VECTOR_LONG, ARG_TEST_VECTOR_SHORT, 2);
+     addOption(opts, "argTestCircuitOption", ARG_TEST_CIRCUIT_LONG, ARG_TEST_CIRCUIT_SHORT, 1);     // FIXME add "Option" suffix to key name
+     addOption(opts, "argTestCircGenOption", ARG_TEST_CIRC_GEN_LONG, ARG_TEST_CIRC_GEN_SHORT, 2);   // FIXME add "Option" suffix to key name
++    addOption(opts, "argVivadoToolPathOption", ARG_VIVADO_TOOL_PATH_LONG, 1);
+ 
+     CommandLine cmd;
+     try {
+@@ -395,6 +397,7 @@ public class Startup implements AWTEventListener {
+         case ARG_TEST_CIRCUIT_LONG -> handleArgTestCircuit(startup, opt);
+         case ARG_TEST_CIRC_GEN_LONG -> handleArgTestCircGen(startup, opt);
+         case ARG_MAIN_CIRCUIT -> handleArgMainCircuit(startup, opt);
++        case ARG_VIVADO_TOOL_PATH_LONG -> handleArgVivadoToolPath(startup, opt);
+         default -> RC.OK; // should not really happen IRL.
+       };
+       lastHandlerRc = optHandlerRc;
+@@ -740,6 +743,17 @@ public class Startup implements AWTEventListener {
+     return RC.OK;
+   }
+ 
++  private static RC handleArgVivadoToolPath(Startup startup, Option opt) {
++    final var path = opt.getValue();
++    // check if the path is valid
++    if (!new File(path).exists()) {
++      logger.error("Vivado tool path does not exist: {}", path);
++      return RC.QUIT;
++    }
++    AppPreferences.VivadoToolPath.set(path);
++    return RC.OK;
++  }
++
+   /* ********************************************************************************************* */
+ 
+   private static void setLocale(String lang) {
