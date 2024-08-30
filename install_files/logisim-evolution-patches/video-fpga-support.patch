@@ -98,10 +98,10 @@ index 7824a942a..8ab6d477f 100644
      @Override
 diff --git a/src/main/java/com/cburch/logisim/std/io/VideoHDLGeneratorFactory.java b/src/main/java/com/cburch/logisim/std/io/VideoHDLGeneratorFactory.java
 new file mode 100644
-index 000000000..ecd6296bd
+index 000000000..c61f447bb
 --- /dev/null
 +++ b/src/main/java/com/cburch/logisim/std/io/VideoHDLGeneratorFactory.java
-@@ -0,0 +1,284 @@
+@@ -0,0 +1,274 @@
 +package com.cburch.logisim.std.io;
 +
 +import java.util.Map;
@@ -303,7 +303,7 @@ index 000000000..ecd6296bd
 +              end if;
 +            end process;
 +
-+            process (pixel_clock, reset)
++            process (pixel_clock)
 +              constant h_total : INTEGER := h_back_porch + h_front_porch + h_pixels + h_sync_pulse;
 +              constant v_total : INTEGER := v_back_porch + v_front_porch + v_pixels + v_sync_pulse;
 +              variable h_count : INTEGER range 0 to h_total - 1 := 0;
@@ -313,17 +313,7 @@ index 000000000..ecd6296bd
 +              read_index(x_bits-1 downto 0) <= std_logic_vector(to_unsigned(h_count * view_width / h_pixels, x_bits));
 +              read_index(x_bits+y_bits-1 downto x_bits) <= std_logic_vector(to_unsigned(v_count * view_height / v_pixels, y_bits));
 +
-+              if (reset = '1') then
-+                h_count := 0;
-+                v_count := 0;
-+                Hsync <= not to_unsigned(h_sync_polarity, 1)(0);
-+                Hsync_buf <= not to_unsigned(h_sync_polarity, 1)(0);
-+                Vsync <= not to_unsigned(v_sync_polarity, 1)(0);
-+                Vsync_buf <= not to_unsigned(v_sync_polarity, 1)(0);
-+                displ_en <= '0';
-+                displ_en_buf <= '0';
-+                read_index <= (others => '0');
-+              elsif rising_edge(pixel_clock) then
++              if rising_edge(pixel_clock) then
 +                Hsync <= Hsync_buf;
 +                Vsync <= Vsync_buf;
 +                displ_en <= displ_en_buf;
