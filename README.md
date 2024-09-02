@@ -82,7 +82,6 @@ The FPGA support for the Keyboard component is implemented to accept a PS/2 keyb
 
 The FPGA support for the Video component is implemented to output a VGA signal (1024x600 at 61Hz). Some functions of the Video component are not supported on the FPGA, which are:
 - There is no cursor on the VGA output, regardless of the cursor setting in the Video component.
-- The reset input does not do anything, as the RAM on the FPGA cannot be reset all at once. Instead, the display has to be manually cleared by writing to Video component.
 - Only the following color models are supported:
     - 888 RGB (24 bit)
     - 555 RGB (15 bit)

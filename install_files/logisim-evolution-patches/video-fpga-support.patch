@@ -18,7 +18,7 @@ index 402785fba..1e410a22d 100644
    }
  
 diff --git a/src/main/java/com/cburch/logisim/std/io/Video.java b/src/main/java/com/cburch/logisim/std/io/Video.java
-index 7824a942a..8ab6d477f 100644
+index 7824a942a..034d21eeb 100644
 --- a/src/main/java/com/cburch/logisim/std/io/Video.java
 +++ b/src/main/java/com/cburch/logisim/std/io/Video.java
 @@ -39,6 +39,9 @@ import com.cburch.logisim.data.Bounds;
@@ -98,10 +98,10 @@ index 7824a942a..8ab6d477f 100644
      @Override
 diff --git a/src/main/java/com/cburch/logisim/std/io/VideoHDLGeneratorFactory.java b/src/main/java/com/cburch/logisim/std/io/VideoHDLGeneratorFactory.java
 new file mode 100644
-index 000000000..c61f447bb
+index 000000000..aeea0ad87
 --- /dev/null
 +++ b/src/main/java/com/cburch/logisim/std/io/VideoHDLGeneratorFactory.java
-@@ -0,0 +1,274 @@
+@@ -0,0 +1,303 @@
 +package com.cburch.logisim.std.io;
 +
 +import java.util.Map;
@@ -288,10 +288,39 @@ index 000000000..c61f447bb
 +            end process;
 +
 +            process (clock)
++              variable reset_write_index : INTEGER range 0 to vram'length - 1 := 0;
++              variable prev_reset : STD_LOGIC := '0';
++              variable is_resetting : STD_LOGIC := '0';
++              variable should_write : STD_LOGIC := '0';
++              variable var_write_index : INTEGER range 0 to vram'length - 1 := 0;
++              variable var_data : STD_LOGIC_VECTOR(vram_out'length - 1 downto 0) := (others => '0');
 +            begin
 +              if rising_edge(clock) then
-+                if (tick = '1' and write_enable = '1') then
-+                  vram(to_integer(unsigned(write_index))) <= data;
++                should_write := '0';
++                if (is_resetting = '0') then
++                  if (tick = '1' and write_enable = '1') then
++                    var_write_index := to_integer(unsigned(write_index));
++                    var_data := data;
++                    should_write := '1';
++                  end if;
++
++                  if (reset = '1' and prev_reset = '0') then
++                    is_resetting := '1';
++                    reset_write_index := 0;
++                  end if;
++                else
++                  var_write_index := reset_write_index;
++                  var_data := (others => '0');
++                  should_write := '1';
++                  if (reset_write_index < vram'length - 1) then
++                    reset_write_index := reset_write_index + 1;
++                  else
++                    is_resetting := '0';
++                  end if;
++                end if;
++                prev_reset := reset;
++                if (should_write = '1') then
++                  vram(var_write_index) <= var_data;
 +                end if;
 +              end if;
 +            end process;
