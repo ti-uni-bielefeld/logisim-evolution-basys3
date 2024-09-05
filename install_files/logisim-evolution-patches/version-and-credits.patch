@@ -22,7 +22,7 @@ index 6d6e7d35a..9f3b48cd0 100644
          .h2(String.format("Copyright \u00A92001-%s %s developers", BuildInfo.year, BuildInfo.name))
          .url(BuildInfo.url)
 +        .h2("Modified Basys3 Version by jonicho")
-+        .url("https://github.com/jonicho/logisim-evolution-basys3")
++        .url("https://github.com/rm144/logisim-evolution-basys3")
          .space()
          .h1(S.get("creditsDevelopedBy"))
          .text("David H. Hutchens")
