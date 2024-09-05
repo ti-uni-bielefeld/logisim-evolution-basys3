@@ -22,8 +22,9 @@ TMP_GIT_REPO_DIR="${TMPDIR:-/tmp}/tmp-logisim-evolution-git-repo"
 
 # check if vivado is installed
 if [ ! -d "$VIVADO_BIN_PATH" ]; then
-    echo "Vivado 2023.2 is not installed in $VIVADO_PATH. Please run install_vivado.sh to install Vivado 2023.2 first."
-    exit 1
+    echo "No Vivado 2023.2 install detected in $VIVADO_PATH. Logisim Evolution will not be automatically linked with Vivado. If this not intended, please re-run the install script and provide the Vivado 2023.2 installer."
+    read -p "If it is intended, simply press enter to continue."
+    VIVADO_BIN_PATH=""
 fi
 
 # check if java is installed
@@ -57,9 +58,15 @@ mkdir -p $INSTALL_PATH
 cp build/libs/logisim-evolution-*.jar $INSTALL_PATH/logisim-evolution.jar
 cd $ORIG_DIR
 
-echo "Setting up run script..."
+if [ -n "$VIVADO_BIN_PATH" ]; then
+    echo "Setting up run script..."
+    VIVADO_PATH_OPTION="--vivado-tool-path \"$(realpath $VIVADO_BIN_PATH)\""
+else
+    echo "Setting up run script without linking Vivado..."
+    VIVADO_PATH_OPTION=""
+fi
 echo "#!/bin/bash" > $INSTALL_PATH/run.sh
-echo "$(realpath $JAVA_HOME/bin/java) -jar $(realpath $INSTALL_PATH/logisim-evolution.jar) --vivado-tool-path \"$(realpath $VIVADO_BIN_PATH)\"" >> $INSTALL_PATH/run.sh
+echo "$(realpath $JAVA_HOME/bin/java) -jar $(realpath $INSTALL_PATH/logisim-evolution.jar) $VIVADO_PATH_OPTION" >> $INSTALL_PATH/run.sh
 chmod a+x $INSTALL_PATH/run.sh
 
 echo "Cleaning up..."

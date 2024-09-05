@@ -23,14 +23,12 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
         $ git clone https://github.com/rm144/logisim-evolution-basys3
         $ cd logisim-evolution-basys3
         ```
-3. Download Vivado 2023.2 from https://account.amd.com/en/forms/downloads/xef.html?filename=FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256_Lin64.bin (requires an account) (not necessary if Vivado is already installed)
-4. Run the install script:
+3. If Vivado should be installed and linked with Logisim (this is only necessary if you want to synthesize and download circuits onto the Basys3 board and if Vivado isn't already installed in the install directory), download Vivado 2023.2 from https://account.amd.com/en/forms/downloads/xef.html?filename=FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256_Lin64.bin (requires an account)
+4. Run the install script and provide the install directory and the Vivado installer file (if downloaded in the previous step):
     ```bash
     $ ./install.sh <install directory> [Vivado 2023.2 installer file]
     ```
-    Where `<install directory>` is the directory where Java, Vivado and Logisim Evolution will be installed (e.g. `/etc/opt/logisim-evolution-basys3`) and `[Vivado 2023.2 installer file]` is the path to the downloaded Vivado 2023.2 installer file (e.g. `~/Downloads/FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256_Lin64.bin`).
-
-    Note: When updating or when Vivado is already installed for another reason, providing the Vivado installer file is optional.
+    Where `<install directory>` is the directory where Java, Vivado and Logisim Evolution will be installed (e.g. `/etc/opt/logisim-evolution-basys3`) and `[Vivado 2023.2 installer file]` is the optional path to the downloaded Vivado 2023.2 installer file (e.g. `~/Downloads/FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256_Lin64.bin`).
 
 ### Common Errors
 
