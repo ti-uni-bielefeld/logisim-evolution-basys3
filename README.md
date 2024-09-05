@@ -96,7 +96,7 @@ The Video component can be mapped to the internal VGA controller of the Basys3 b
 Most of the work was done by [Jonas Keller](https://github.com/jonicho) on behalf of the [Computer Engineering Group (AG Technische Informatik)
 of Bielefeld University](https://www.ti.uni-bielefeld.de/).
 
-The patches for the Keyboard and Video components contain modified code from DigiKey (https://forum.digikey.com/t/ps-2-keyboard-to-ascii-converter-vhdl/12616 and https://forum.digikey.com/t/vga-controller-vhdl/12794).
+The patches for the [Keyboard](install_files/logisim-evolution-patches/keyboard-fpga-support.patch) and [Video](install_files/logisim-evolution-patches/video-fpga-support.patch) components contain modified code from DigiKey ([Keyboard](https://forum.digikey.com/t/ps-2-keyboard-to-ascii-converter-vhdl/12616) and [Video](https://forum.digikey.com/t/vga-controller-vhdl/12794)).
 
 ## License
 
