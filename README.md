@@ -90,3 +90,14 @@ The FPGA support for the Video component is implemented to output a VGA signal (
     - Grayscale (4 bit)
 
 The Video component can be mapped to the internal VGA controller of the Basys3 board to use it with a VGA monitor connected to the Basys3 board.
+
+## Authors and Contributors
+
+Most of the work was done by [Jonas Keller](https://github.com/jonicho) on behalf of the [Computer Engineering Group (AG Technische Informatik)
+of Bielefeld University](https://www.ti.uni-bielefeld.de/).
+
+The patches for the Keyboard and Video components contain modified code from DigiKey (https://forum.digikey.com/t/ps-2-keyboard-to-ascii-converter-vhdl/12616 and https://forum.digikey.com/t/vga-controller-vhdl/12794).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
