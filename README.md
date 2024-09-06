@@ -70,11 +70,11 @@ For example:
 ```bash
 $ /etc/opt/logisim-evolution-basys3/logisim-evolution/run.sh
 ```
-For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](USER_MANUAL.md), which also gets installed into the `logisim-evolution` directory.
+For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](USER_MANUAL.md), which also gets installed into the install directory.
 
 ## Example Circuit
 
-An example circuit that demonstrates the usage of the Basys3 board and the Keyboard and Video components can be found in the `example.circ` file in the installed `logisim-evolution` directory.
+An example circuit that demonstrates the usage of the Basys3 board and the Keyboard and Video components can be found in the `example.circ` file in the install directory.
 
 The example circuit simply reads values from the Keyboard component and displays them bitwise on the Video component.
 
