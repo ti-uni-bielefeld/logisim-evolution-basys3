@@ -5,7 +5,7 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
 ![Example Setup](example_setup/images/setup.jpg)
 
 ## Features
-- Installs Java, Vivado and Logisim Evolution into a directory of your choice
+- Installer for Java, Vivado and Logisim Evolution into a directory of your choice
 - Script to start Logisim Evolution
 - User Manual with instructions on how to synthesize and download circuits to the Basys3 FPGA board
 - Additional patches onto Logisim Evolution 3.9.0 to make it easier to synthesize and download circuits to the Basys3 FPGA board. These patches include:
@@ -72,8 +72,13 @@ $ /etc/opt/logisim-evolution-basys3/logisim-evolution/run.sh
 ```
 For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](USER_MANUAL.md), which also gets installed into the `logisim-evolution` directory.
 
-## Example
-An example circuit that demonstrates the usage of the Basys3 board and the Keyboard and Video components can be found in the `example.circ` file in the installed `logisim-evolution` directory. Simply run Logisim Evolution as described above and open the `example.circ` file and follow the instructions in the [User Manual](USER_MANUAL.md) to synthesize and download the circuit to the Basys3 FPGA board.
+## Example Circuit
+
+An example circuit that demonstrates the usage of the Basys3 board and the Keyboard and Video components can be found in the `example.circ` file in the installed `logisim-evolution` directory.
+
+The example circuit simply reads values from the Keyboard component and displays them bitwise on the Video component.
+
+Simply run Logisim Evolution as described above and open the `example.circ` file and follow the instructions in the [User Manual](USER_MANUAL.md) to synthesize and download the circuit to the Basys3 FPGA board.
 
 ## Keyboard and Video components
 
