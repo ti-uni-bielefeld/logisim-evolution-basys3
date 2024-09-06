@@ -15,7 +15,7 @@ INSTALL_PATH=$1
 mkdir -p $INSTALL_PATH
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cp $SCRIPT_DIR/README.md $SCRIPT_DIR/example.circ $SCRIPT_DIR/USER_MANUAL.md $INSTALL_PATH/
+cp $SCRIPT_DIR/{README.md,example.circ,USER_MANUAL.md,LICENSE} $INSTALL_PATH/
 
 # set correct path to run script in user manual
 sed -i "s|/path/to/logisim-evolution/run.sh|$INSTALL_PATH/logisim-evolution/run.sh|g" $INSTALL_PATH/USER_MANUAL.md
