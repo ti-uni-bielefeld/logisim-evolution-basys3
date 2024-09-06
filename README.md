@@ -1,6 +1,8 @@
 # logisim-evolution-basys3
 
-A set of scripts, manuals and patches to make synthesizing and downloading circuits from [Logisim Evolution](https://github.com/logisim-evolution/logisim-evolution) onto the [Basys3 FPGA board](https://digilent.com/reference/programmable-logic/basys-3/start) on Linux easier and more seamless.
+A set of scripts, manuals and patches to make synthesizing and downloading circuits from [Logisim Evolution](https://github.com/logisim-evolution/logisim-evolution) onto the [Basys3 FPGA board](https://digilent.com/reference/programmable-logic/basys-3/start) on Linux easier and more seamless, including an exemplary setup with a display and a keyboard.
+
+![Example Setup](example_setup/images/setup.jpg)
 
 ## Features
 - Installs Java, Vivado and Logisim Evolution into a directory of your choice
@@ -11,6 +13,11 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
     - Only show Basys3 board in FPGA menu
     - Fix for asynchronous RAM
     - Automatically set Vivado tool path
+- Instructions for an exemplary setup of the Basys3 board with a display and a keyboard (see [Example Setup](#example-setup))
+
+## Example Setup
+
+This repo was developed with a specific exemplary setup in mind which is described in more detail [here](example_setup/README.md). However, the specific parts are not necessary, any setup with a Basys3 FPGA board, a display and a keyboard should work.
 
 ## Installation
 1. Get a copy of this repository by doing either of the following:
@@ -93,6 +100,8 @@ The Video component can be mapped to the internal VGA controller of the Basys3 b
 
 Most of the work was done by [Jonas Keller](https://github.com/jonicho) on behalf of the [Computer Engineering Group (AG Technische Informatik)
 of Bielefeld University](https://www.ti.uni-bielefeld.de/).
+
+The example setup was designed by [Klaus Kulitza](https://ekvv.uni-bielefeld.de/pers_publ/publ/PersonDetail.jsp?personId=5314955) on behalf of the [Computer Engineering Group (AG Technische Informatik) of Bielefeld University](https://www.ti.uni-bielefeld.de/).
 
 The patches for the [Keyboard](install_files/logisim-evolution-patches/keyboard-fpga-support.patch) and [Video](install_files/logisim-evolution-patches/video-fpga-support.patch) components contain modified code from DigiKey ([Keyboard](https://forum.digikey.com/t/ps-2-keyboard-to-ascii-converter-vhdl/12616) and [Video](https://forum.digikey.com/t/vga-controller-vhdl/12794)).
 
