@@ -1,0 +1,352 @@
+Adds a Timer component
+
+diff --git a/src/main/java/com/cburch/logisim/std/memory/MemoryLibrary.java b/src/main/java/com/cburch/logisim/std/memory/MemoryLibrary.java
+index 25e9fe61f..18a3d6473 100644
+--- a/src/main/java/com/cburch/logisim/std/memory/MemoryLibrary.java
++++ b/src/main/java/com/cburch/logisim/std/memory/MemoryLibrary.java
+@@ -36,6 +36,7 @@ public class MemoryLibrary extends Library {
+     new FactoryDescription(Counter.class, S.getter("counterComponent"), "counter.gif"),
+     new FactoryDescription(ShiftRegister.class, S.getter("shiftRegisterComponent"), "shiftreg.gif"),
+     new FactoryDescription(Random.class, S.getter("randomComponent"), "random.gif"),
++    new FactoryDescription(Timer.class, S.getter("timerComponent"), "timer.gif"),
+     new FactoryDescription(Ram.class, S.getter("ramComponent"), "ram.gif"),
+     new FactoryDescription(Rom.class, S.getter("romComponent"), "rom.gif"),
+   };
+diff --git a/src/main/java/com/cburch/logisim/std/memory/Timer.java b/src/main/java/com/cburch/logisim/std/memory/Timer.java
+new file mode 100644
+index 000000000..c2e37a5df
+--- /dev/null
++++ b/src/main/java/com/cburch/logisim/std/memory/Timer.java
+@@ -0,0 +1,219 @@
++package com.cburch.logisim.std.memory;
++
++import static com.cburch.logisim.std.Strings.S;
++
++import java.awt.Color;
++import java.util.TimerTask;
++
++import com.cburch.logisim.data.Attribute;
++import com.cburch.logisim.data.AttributeOption;
++import com.cburch.logisim.data.Attributes;
++import com.cburch.logisim.data.BitWidth;
++import com.cburch.logisim.data.Bounds;
++import com.cburch.logisim.data.Value;
++import com.cburch.logisim.instance.Instance;
++import com.cburch.logisim.instance.InstanceData;
++import com.cburch.logisim.instance.InstanceFactory;
++import com.cburch.logisim.instance.InstancePainter;
++import com.cburch.logisim.instance.InstanceState;
++import com.cburch.logisim.instance.Port;
++import com.cburch.logisim.instance.StdAttr;
++import com.cburch.logisim.prefs.AppPreferences;
++import com.cburch.logisim.util.GraphicsUtil;
++
++public class Timer extends InstanceFactory {
++  /**
++   * Unique identifier of the tool, used as reference in project files.
++   * Do NOT change as it will prevent project files from loading.
++   *
++   * Identifier value must MUST be unique string among all tools.
++   */
++  public static final String _ID = "Timer";
++
++  public static final int PORT_CLK = 0;
++  public static final int PORT_VAL = 1;
++  public static final int PORT_SET = 2;
++  public static final int PORT_RST = 3;
++  public static final int PORT_DONE = 4;
++
++  private static class StateData extends ClockState implements InstanceData {
++    private long startTimeNanos = 0;
++    private long durationNanos = 0;
++    private final java.util.Timer timer = new java.util.Timer("LogisimTimerComponentTimer", true);
++    private TimerTask taskDone = null;
++    private TimerTask taskUpdate = null;
++
++    private void reset() {
++      startTimeNanos = 0;
++      durationNanos = 0;
++      if (taskDone != null) {
++        taskDone.cancel();
++        taskDone = null;
++      }
++      if (taskUpdate != null) {
++        taskUpdate.cancel();
++        taskUpdate = null;
++      }
++    }
++
++    private void start(long durationNanos, InstanceState state) {
++      reset();
++      startTimeNanos = System.nanoTime();
++      this.durationNanos = durationNanos;
++
++      // schedule a task to fire invalidation when the timer is done
++      taskDone = new TimerTask() {
++        @Override
++        public void run() {
++          if (!isDone()) {
++            // force done to true
++            startTimeNanos = System.nanoTime();
++          }
++          state.fireInvalidated();
++        }
++      };
++      timer.schedule(taskDone, durationNanos / 1_000_000);
++      // schedule a task to fire invalidation at fixed interval to update the
++      // remaining time in the UI
++      taskUpdate = new TimerTask() {
++        @Override
++        public void run() {
++          if (getRemainingTime() == 0) {
++            cancel();
++          }
++          state.fireInvalidated();
++        }
++      };
++      timer.scheduleAtFixedRate(taskUpdate, 0, 100);
++    }
++
++    private boolean isRunning() {
++      return startTimeNanos != 0;
++    }
++
++    private boolean isDone() {
++      return isRunning() && System.nanoTime() - startTimeNanos >= durationNanos;
++    }
++
++    private long getRemainingTime() {
++      if (!isRunning()) {
++        return 0;
++      }
++      return Math.max(durationNanos - (System.nanoTime() - startTimeNanos), 0);
++    }
++  }
++
++  public static final AttributeOption UNIT_US = new AttributeOption("µs", S.getter("µs"));
++  public static final AttributeOption UNIT_MS = new AttributeOption("ms", S.getter("ms"));
++  public static final AttributeOption UNIT_S = new AttributeOption("s", S.getter("s"));
++  public static final Attribute<AttributeOption> ATTR_UNIT = Attributes.forOption("unit", S.getter("timerUnitAttr"),
++      new AttributeOption[] { UNIT_US, UNIT_MS, UNIT_S });
++
++  public Timer() {
++    super(_ID, S.getter("timerComponent"), new TimerHDLGeneratorFactory(), true, false);
++    setOffsetBounds(Bounds.create(0, 0, 100, 70));
++    setAttributes(
++        new Attribute[] {
++            StdAttr.WIDTH,
++            ATTR_UNIT,
++            StdAttr.EDGE_TRIGGER,
++            StdAttr.LABEL,
++            StdAttr.LABEL_FONT,
++            StdAttr.LABEL_VISIBILITY
++        },
++        new Object[] {
++            BitWidth.create(16),
++            UNIT_MS,
++            StdAttr.TRIG_RISING,
++            "",
++            StdAttr.DEFAULT_LABEL_FONT,
++            true
++        });
++  }
++
++  @Override
++  public void paintInstance(InstancePainter painter) {
++    final var g = painter.getGraphics();
++    final var bounds = painter.getBounds();
++    final var data = (StateData) painter.getData();
++    final var unit = painter.getAttributeValue(ATTR_UNIT).toString();
++    final var remainingTime = data == null ? 0 : data.getRemainingTime();
++    final String remainingTimeStr = switch (unit) {
++      case "µs" -> String.format("%d µs", remainingTime / 1_000);
++      case "ms" -> String.format("%d ms", remainingTime / 1_000_000);
++      case "s" -> String.format("%.3f s", remainingTime / 1_000_000_000.0);
++      default -> throw new UnsupportedOperationException("Unsupported unit: " + unit);
++    };
++    g.setColor(new Color(AppPreferences.COMPONENT_COLOR.get()));
++    painter.drawLabel();
++    painter.drawBounds();
++    painter.drawPorts();
++    painter.drawClockSymbol(bounds.getX(), bounds.getY() + 10);
++    GraphicsUtil.drawText(g, "Val", bounds.getX() + 10, bounds.getY() + 20, GraphicsUtil.H_LEFT,
++        GraphicsUtil.V_CENTER_OVERALL);
++    GraphicsUtil.drawText(g, "Set", bounds.getX() + 10, bounds.getY() + 30, GraphicsUtil.H_LEFT,
++        GraphicsUtil.V_CENTER_OVERALL);
++    GraphicsUtil.drawText(g, "Reset", bounds.getX() + 10, bounds.getY() + 40, GraphicsUtil.H_LEFT,
++        GraphicsUtil.V_CENTER_OVERALL);
++    GraphicsUtil.drawText(g, "Done", bounds.getX() - 10 + bounds.getWidth(), bounds.getY() + 10, GraphicsUtil.H_RIGHT,
++        GraphicsUtil.V_CENTER_OVERALL);
++    GraphicsUtil.drawText(g, remainingTimeStr, bounds.getCenterX(), bounds.getY() + 60,
++        GraphicsUtil.H_CENTER,
++        GraphicsUtil.V_CENTER_OVERALL);
++  }
++
++  @Override
++  public void propagate(InstanceState state) {
++    final var data = getStateData(state);
++    final var triggerType = state.getAttributeValue(StdAttr.EDGE_TRIGGER);
++    final var triggered = data.updateClock(state.getPortValue(PORT_CLK), triggerType);
++    if (state.getPortValue(PORT_RST) == Value.TRUE) {
++      data.reset();
++    } else if (triggered && state.getPortValue(PORT_SET) == Value.TRUE) {
++      final var unit = state.getAttributeValue(ATTR_UNIT).toString();
++      final var inputValue = state.getPortValue(PORT_VAL).toLongValue();
++      final var durationNanos = switch (unit) {
++        case "µs" -> inputValue * 1_000;
++        case "ms" -> inputValue * 1_000_000;
++        case "s" -> inputValue * 1_000_000_000;
++        default -> throw new UnsupportedOperationException("Unsupported unit: " + unit);
++      };
++      data.start(durationNanos, state);
++    }
++    state.setPort(PORT_DONE, data.isDone() && data.durationNanos != 0 ? Value.TRUE : Value.FALSE, 1);
++  }
++
++  @Override
++  protected void configureNewInstance(Instance instance) {
++    configurePorts(instance);
++    final var bounds = instance.getBounds();
++    instance.setTextField(StdAttr.LABEL, StdAttr.LABEL_FONT, bounds.getCenterX(),
++        bounds.getY() - 2, GraphicsUtil.H_CENTER, GraphicsUtil.V_BOTTOM);
++  }
++
++  private void configurePorts(Instance instance) {
++    final var bounds = instance.getBounds();
++    final var ports = new Port[5];
++    ports[PORT_CLK] = new Port(0, 10, Port.INPUT, 1);
++    ports[PORT_VAL] = new Port(0, 20, Port.INPUT, StdAttr.WIDTH);
++    ports[PORT_SET] = new Port(0, 30, Port.INPUT, 1);
++    ports[PORT_RST] = new Port(0, 40, Port.INPUT, 1);
++    ports[PORT_DONE] = new Port(bounds.getWidth(), 10, Port.OUTPUT, 1);
++    ports[PORT_RST].setToolTip(S.getter("timerResetTip"));
++    ports[PORT_CLK].setToolTip(S.getter("timerClockTip"));
++    ports[PORT_VAL].setToolTip(S.getter("timerValueTip"));
++    ports[PORT_SET].setToolTip(S.getter("timerSetTip"));
++    ports[PORT_DONE].setToolTip(S.getter("timerDoneTip"));
++    instance.setPorts(ports);
++  }
++
++  private StateData getStateData(InstanceState state) {
++    var data = (StateData) state.getData();
++    if (data == null) {
++      data = new StateData();
++      state.setData(data);
++    }
++    return data;
++  }
++
++}
+diff --git a/src/main/java/com/cburch/logisim/std/memory/TimerHDLGeneratorFactory.java b/src/main/java/com/cburch/logisim/std/memory/TimerHDLGeneratorFactory.java
+new file mode 100644
+index 000000000..87632c966
+--- /dev/null
++++ b/src/main/java/com/cburch/logisim/std/memory/TimerHDLGeneratorFactory.java
+@@ -0,0 +1,86 @@
++package com.cburch.logisim.std.memory;
++
++import java.util.HashMap;
++
++import com.cburch.logisim.data.AttributeSet;
++import com.cburch.logisim.fpga.designrulecheck.Netlist;
++import com.cburch.logisim.fpga.hdlgenerator.AbstractHdlGeneratorFactory;
++import com.cburch.logisim.fpga.hdlgenerator.Hdl;
++import com.cburch.logisim.fpga.hdlgenerator.HdlParameters;
++import com.cburch.logisim.fpga.hdlgenerator.HdlPorts;
++import com.cburch.logisim.instance.Port;
++import com.cburch.logisim.util.LineBuffer;
++
++public class TimerHDLGeneratorFactory extends AbstractHdlGeneratorFactory {
++  private static final String NR_OF_BITS_STRING = "nrOfBits";
++  private static final int NR_OF_BITS_ID = -1;
++  private static final String CLOCKS_PER_UNIT_STRING = "clocksPerUnit";
++  private static final int CLOCKS_PER_UNIT_ID = -2;
++
++  public TimerHDLGeneratorFactory() {
++    super();
++    myParametersList
++        .add(NR_OF_BITS_STRING, NR_OF_BITS_ID)
++        .add(CLOCKS_PER_UNIT_STRING, CLOCKS_PER_UNIT_ID, HdlParameters.MAP_ATTRIBUTE_OPTION, Timer.ATTR_UNIT,
++            new HashMap<>() {
++              {
++                put(Timer.UNIT_US, 100);
++                put(Timer.UNIT_MS, 100_000);
++                put(Timer.UNIT_S, 100_000_000);
++              }
++            });
++    myPorts
++        .add(Port.CLOCK, HdlPorts.getClockName(1), 1, Timer.PORT_CLK)
++        .add(Port.INPUT, "val", NR_OF_BITS_ID, Timer.PORT_VAL)
++        .add(Port.INPUT, "set", 1, Timer.PORT_SET)
++        .add(Port.INPUT, "rst", 1, Timer.PORT_RST)
++        .add(Port.OUTPUT, "done", 1, Timer.PORT_DONE);
++  }
++
++  @Override
++  public boolean isHdlSupportedTarget(AttributeSet attrs) {
++    return Hdl.isVhdl();
++  }
++
++  @Override
++  public LineBuffer getModuleFunctionality(Netlist netlist, AttributeSet attrs) {
++    if (!Hdl.isVhdl()) {
++      throw new UnsupportedOperationException("Only VHDL is supported");
++    }
++    final var contents = LineBuffer.getBuffer()
++        .pair("clock", HdlPorts.getClockName(1))
++        .pair("tick", HdlPorts.getTickName(1))
++        .pair("clocks_per_unit", String.valueOf(CLOCKS_PER_UNIT_STRING));
++    contents.empty().addVhdlKeywords();
++    contents.add("""
++        {{process}} ({{clock}}, rst) {{is}}
++          {{variable}} value : unsigned(nrOfBits - 1 downto 0) := (others => '0');
++          {{variable}} counter : unsigned(nrOfBits - 1 downto 0) := (others => '0');
++          {{variable}} unit_counter : integer range {{clocks_per_unit}} - 1 downto 0 := 0;
++        {{begin}}
++          {{if}} rst = '1' {{then}}
++            counter := (others => '0');
++            value := (others => '0');
++            unit_counter := 0;
++            done <= '0';
++          {{elsif}} rising_edge({{clock}}) {{then}}
++            {{if}} set = '1' {{and}} {{tick}} = '1' {{then}}
++              counter := (others => '0');
++              value := unsigned(val);
++              unit_counter := 0;
++              done <= '0';
++            {{elsif}} counter /= value {{then}}
++              unit_counter := unit_counter + 1;
++              {{if}} unit_counter = {{clocks_per_unit}} - 1 {{then}}
++                unit_counter := 0;
++                counter := counter + 1;
++              {{end}} {{if}};
++            {{elsif}} value /= 0 {{then}}
++              done <= '1';
++            {{end}} {{if}};
++          {{end}} {{if}};
++        {{end}} {{process}};
++        """);
++    return contents;
++  }
++}
+diff --git a/src/main/resources/resources/logisim/strings/std/std.properties b/src/main/resources/resources/logisim/strings/std/std.properties
+index 433268988..4ebf16c8f 100644
+--- a/src/main/resources/resources/logisim/strings/std/std.properties
++++ b/src/main/resources/resources/logisim/strings/std/std.properties
+@@ -624,6 +624,16 @@ randomResetTip = Clear: When 1, resets to initial seed asynchronously
+ randomSeedAttr = Seed
+ randomWidthLabel = Width: %d
+ #
++# memory/Timer.java
++#
++timerComponent = Timer
++timerResetTip = Reset: when 1, resets asynchronously
++timerClockTip = Clock: timer may start on trigger
++timerValueTip = Value: value to set timer to, 0 to deactivate timer
++timerSetTip = Set: when 1, starts timer on clock trigger
++timerDoneTip = Done: 1 when timer reaches 0
++timerUnitAttr = Time Unit
++#
+ # memory/Register.java
+ #
+ registerClkTip = Clock: value updates on trigger
