@@ -14,10 +14,10 @@ index 25e9fe61f..18a3d6473 100644
    };
 diff --git a/src/main/java/com/cburch/logisim/std/memory/Timer.java b/src/main/java/com/cburch/logisim/std/memory/Timer.java
 new file mode 100644
-index 000000000..4feb771ca
+index 000000000..aa1273729
 --- /dev/null
 +++ b/src/main/java/com/cburch/logisim/std/memory/Timer.java
-@@ -0,0 +1,189 @@
+@@ -0,0 +1,202 @@
 +package com.cburch.logisim.std.memory;
 +
 +import static com.cburch.logisim.std.Strings.S;
@@ -90,7 +90,7 @@ index 000000000..4feb771ca
 +
 +  public Timer() {
 +    super(_ID, S.getter("timerComponent"), new TimerHDLGeneratorFactory(), true, false);
-+    setOffsetBounds(Bounds.create(0, 0, 100, 70));
++    setOffsetBounds(Bounds.create(0, 0, 100, 90));
 +    setAttributes(
 +        new Attribute[] {
 +            StdAttr.WIDTH,
@@ -123,6 +123,13 @@ index 000000000..4feb771ca
 +      case "s" -> String.format("%.3f s", remainingTime / 1_000_000_000.0);
 +      default -> throw new UnsupportedOperationException("Unsupported unit: " + unit);
 +    };
++    final var duration = data == null ? 0 : data.durationNanos;
++    final String durationStr = switch (unit) {
++      case "µs" -> String.format("%d µs", duration / 1_000);
++      case "ms" -> String.format("%d ms", duration / 1_000_000);
++      case "s" -> String.format("%d s", duration / 1_000_000_000);
++      default -> throw new UnsupportedOperationException("Unsupported unit: " + unit);
++    };
 +    g.setColor(new Color(AppPreferences.COMPONENT_COLOR.get()));
 +    painter.drawLabel();
 +    painter.drawBounds();
@@ -136,7 +143,13 @@ index 000000000..4feb771ca
 +        GraphicsUtil.V_CENTER_OVERALL);
 +    GraphicsUtil.drawText(g, "Out", bounds.getX() - 10 + bounds.getWidth(), bounds.getY() + 10, GraphicsUtil.H_RIGHT,
 +        GraphicsUtil.V_CENTER_OVERALL);
-+    GraphicsUtil.drawText(g, remainingTimeStr, bounds.getCenterX(), bounds.getY() + 60,
++    g.setColor(Color.LIGHT_GRAY);
++    g.fillRect(bounds.getX() + 10, bounds.getY() + 50, bounds.getWidth() - 20, 35);
++    g.setColor(new Color(AppPreferences.COMPONENT_COLOR.get()));
++    GraphicsUtil.drawText(g, durationStr, bounds.getCenterX(), bounds.getY() + 60,
++        GraphicsUtil.H_CENTER,
++        GraphicsUtil.V_CENTER_OVERALL);
++    GraphicsUtil.drawText(g, remainingTimeStr, bounds.getCenterX(), bounds.getY() + 75,
 +        GraphicsUtil.H_CENTER,
 +        GraphicsUtil.V_CENTER_OVERALL);
 +  }
