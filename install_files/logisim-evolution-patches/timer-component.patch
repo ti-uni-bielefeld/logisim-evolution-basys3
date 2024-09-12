@@ -14,7 +14,7 @@ index 25e9fe61f..18a3d6473 100644
    };
 diff --git a/src/main/java/com/cburch/logisim/std/memory/Timer.java b/src/main/java/com/cburch/logisim/std/memory/Timer.java
 new file mode 100644
-index 000000000..aa1273729
+index 000000000..4800525a1
 --- /dev/null
 +++ b/src/main/java/com/cburch/logisim/std/memory/Timer.java
 @@ -0,0 +1,202 @@
@@ -23,7 +23,6 @@ index 000000000..aa1273729
 +import static com.cburch.logisim.std.Strings.S;
 +
 +import java.awt.Color;
-+import java.util.TimerTask;
 +
 +import com.cburch.logisim.data.Attribute;
 +import com.cburch.logisim.data.AttributeOption;
@@ -51,7 +50,7 @@ index 000000000..aa1273729
 +  public static final String _ID = "Timer";
 +
 +  public static final int PORT_CLK = 0;
-+  public static final int PORT_VAL = 1;
++  public static final int PORT_DUR = 1;
 +  public static final int PORT_SET = 2;
 +  public static final int PORT_RST = 3;
 +  public static final int PORT_OUT = 4;
@@ -134,22 +133,23 @@ index 000000000..aa1273729
 +    painter.drawLabel();
 +    painter.drawBounds();
 +    painter.drawPorts();
-+    painter.drawClockSymbol(bounds.getX(), bounds.getY() + 10);
-+    GraphicsUtil.drawText(g, "Val", bounds.getX() + 10, bounds.getY() + 20, GraphicsUtil.H_LEFT,
++    GraphicsUtil.drawText(g, "Duration", bounds.getX() + 5, bounds.getY() + 10, GraphicsUtil.H_LEFT,
 +        GraphicsUtil.V_CENTER_OVERALL);
-+    GraphicsUtil.drawText(g, "Set", bounds.getX() + 10, bounds.getY() + 30, GraphicsUtil.H_LEFT,
++    GraphicsUtil.drawText(g, "Set", bounds.getX() + 5, bounds.getY() + 20, GraphicsUtil.H_LEFT,
 +        GraphicsUtil.V_CENTER_OVERALL);
-+    GraphicsUtil.drawText(g, "Reset", bounds.getX() + 10, bounds.getY() + 40, GraphicsUtil.H_LEFT,
++    painter.drawClockSymbol(bounds.getX(), bounds.getY() + 30);
++    GraphicsUtil.drawText(g, "Out", bounds.getX() - 5 + bounds.getWidth(), bounds.getY() + 10, GraphicsUtil.H_RIGHT,
 +        GraphicsUtil.V_CENTER_OVERALL);
-+    GraphicsUtil.drawText(g, "Out", bounds.getX() - 10 + bounds.getWidth(), bounds.getY() + 10, GraphicsUtil.H_RIGHT,
-+        GraphicsUtil.V_CENTER_OVERALL);
++        g.setColor(new Color(AppPreferences.COMPONENT_SECONDARY_COLOR.get()));
++    GraphicsUtil.drawText(g, "R", bounds.getCenterX(), bounds.getY() + bounds.getHeight(), GraphicsUtil.H_CENTER,
++        GraphicsUtil.V_BOTTOM);
 +    g.setColor(Color.LIGHT_GRAY);
-+    g.fillRect(bounds.getX() + 10, bounds.getY() + 50, bounds.getWidth() - 20, 35);
++    g.fillRect(bounds.getX() + 10, bounds.getY() + 35, bounds.getWidth() - 20, 35);
 +    g.setColor(new Color(AppPreferences.COMPONENT_COLOR.get()));
-+    GraphicsUtil.drawText(g, durationStr, bounds.getCenterX(), bounds.getY() + 60,
++    GraphicsUtil.drawText(g, durationStr, bounds.getCenterX(), bounds.getY() + 45,
 +        GraphicsUtil.H_CENTER,
 +        GraphicsUtil.V_CENTER_OVERALL);
-+    GraphicsUtil.drawText(g, remainingTimeStr, bounds.getCenterX(), bounds.getY() + 75,
++    GraphicsUtil.drawText(g, remainingTimeStr, bounds.getCenterX(), bounds.getY() + 60,
 +        GraphicsUtil.H_CENTER,
 +        GraphicsUtil.V_CENTER_OVERALL);
 +  }
@@ -165,11 +165,11 @@ index 000000000..aa1273729
 +    } else if (triggered) {
 +      if (state.getPortValue(PORT_SET) == Value.TRUE) {
 +        final var unit = state.getAttributeValue(ATTR_UNIT).toString();
-+        final var inputValue = state.getPortValue(PORT_VAL).toLongValue();
++        final var durationInput = state.getPortValue(PORT_DUR).toLongValue();
 +        final var durationNanos = switch (unit) {
-+          case "µs" -> inputValue * 1_000;
-+          case "ms" -> inputValue * 1_000_000;
-+          case "s" -> inputValue * 1_000_000_000;
++          case "µs" -> durationInput * 1_000;
++          case "ms" -> durationInput * 1_000_000;
++          case "s" -> durationInput * 1_000_000_000;
 +          default -> throw new UnsupportedOperationException("Unsupported unit: " + unit);
 +        };
 +        data.start(durationNanos);
@@ -197,14 +197,14 @@ index 000000000..aa1273729
 +  private void configurePorts(Instance instance) {
 +    final var bounds = instance.getBounds();
 +    final var ports = new Port[5];
-+    ports[PORT_CLK] = new Port(0, 10, Port.INPUT, 1);
-+    ports[PORT_VAL] = new Port(0, 20, Port.INPUT, StdAttr.WIDTH);
-+    ports[PORT_SET] = new Port(0, 30, Port.INPUT, 1);
-+    ports[PORT_RST] = new Port(0, 40, Port.INPUT, 1);
++    ports[PORT_CLK] = new Port(0, 30, Port.INPUT, 1);
++    ports[PORT_DUR] = new Port(0, 10, Port.INPUT, StdAttr.WIDTH);
++    ports[PORT_SET] = new Port(0, 20, Port.INPUT, 1);
++    ports[PORT_RST] = new Port(bounds.getWidth()/2, bounds.getHeight(), Port.INPUT, 1);
 +    ports[PORT_OUT] = new Port(bounds.getWidth(), 10, Port.OUTPUT, 1);
 +    ports[PORT_RST].setToolTip(S.getter("timerResetTip"));
 +    ports[PORT_CLK].setToolTip(S.getter("timerClockTip"));
-+    ports[PORT_VAL].setToolTip(S.getter("timerValueTip"));
++    ports[PORT_DUR].setToolTip(S.getter("timerDurationTip"));
 +    ports[PORT_SET].setToolTip(S.getter("timerSetTip"));
 +    ports[PORT_OUT].setToolTip(S.getter("timerOutTip"));
 +    instance.setPorts(ports);
@@ -222,7 +222,7 @@ index 000000000..aa1273729
 +}
 diff --git a/src/main/java/com/cburch/logisim/std/memory/TimerHDLGeneratorFactory.java b/src/main/java/com/cburch/logisim/std/memory/TimerHDLGeneratorFactory.java
 new file mode 100644
-index 000000000..43d9a2c20
+index 000000000..840dd4d88
 --- /dev/null
 +++ b/src/main/java/com/cburch/logisim/std/memory/TimerHDLGeneratorFactory.java
 @@ -0,0 +1,97 @@
@@ -259,7 +259,7 @@ index 000000000..43d9a2c20
 +            });
 +    myPorts
 +        .add(Port.CLOCK, HdlPorts.getClockName(1), 1, Timer.PORT_CLK)
-+        .add(Port.INPUT, "val", NR_OF_BITS_ID, Timer.PORT_VAL)
++        .add(Port.INPUT, "val", NR_OF_BITS_ID, Timer.PORT_DUR)
 +        .add(Port.INPUT, "set", 1, Timer.PORT_SET)
 +        .add(Port.INPUT, "rst", 1, Timer.PORT_RST)
 +        .add(Port.OUTPUT, "done", 1, Timer.PORT_OUT);
@@ -324,7 +324,7 @@ index 000000000..43d9a2c20
 +  }
 +}
 diff --git a/src/main/resources/resources/logisim/strings/std/std.properties b/src/main/resources/resources/logisim/strings/std/std.properties
-index 433268988..3823877a4 100644
+index 433268988..259e80da7 100644
 --- a/src/main/resources/resources/logisim/strings/std/std.properties
 +++ b/src/main/resources/resources/logisim/strings/std/std.properties
 @@ -624,6 +624,16 @@ randomResetTip = Clear: When 1, resets to initial seed asynchronously
@@ -336,7 +336,7 @@ index 433268988..3823877a4 100644
 +timerComponent = Timer
 +timerResetTip = Reset: when 1, resets asynchronously
 +timerClockTip = Clock: timer may start on trigger
-+timerValueTip = Value: value to set timer to, 0 to deactivate timer
++timerDurationTip = Duration: duration to set timer to, 0 to deactivate timer
 +timerSetTip = Set: when 1, starts timer on clock trigger
 +timerOutTip = Out: 1 for one clock cycle when timer reached 0
 +timerUnitAttr = Time Unit
