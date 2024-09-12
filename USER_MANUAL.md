@@ -37,6 +37,10 @@ Some components in Logisim cannot be synthesized by Logisim. Avoid using these. 
 
 If an attempt is made to synthesize a circuit that contains an unsupported component, an error message is displayed.
 
+### Always use a rising edge trigger
+
+In components where the clock trigger can be set, always use the rising edge trigger. The FPGA support for falling edge triggers is spotty and may not work as expected.
+
 ## Synthesizing and downloading a circuit to the Basys3 FPGA board
 
 To synthesize and download a circuit to the Basys3 FPGA board, follow these steps:
