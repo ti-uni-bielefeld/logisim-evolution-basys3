@@ -1,24 +1,81 @@
 Adds a Timer component
 
-diff --git a/src/main/java/com/cburch/logisim/std/memory/MemoryLibrary.java b/src/main/java/com/cburch/logisim/std/memory/MemoryLibrary.java
-index 25e9fe61f..18a3d6473 100644
---- a/src/main/java/com/cburch/logisim/std/memory/MemoryLibrary.java
-+++ b/src/main/java/com/cburch/logisim/std/memory/MemoryLibrary.java
-@@ -36,6 +36,7 @@ public class MemoryLibrary extends Library {
-     new FactoryDescription(Counter.class, S.getter("counterComponent"), "counter.gif"),
-     new FactoryDescription(ShiftRegister.class, S.getter("shiftRegisterComponent"), "shiftreg.gif"),
-     new FactoryDescription(Random.class, S.getter("randomComponent"), "random.gif"),
-+    new FactoryDescription(Timer.class, S.getter("timerComponent"), "timer.gif"),
-     new FactoryDescription(Ram.class, S.getter("ramComponent"), "ram.gif"),
-     new FactoryDescription(Rom.class, S.getter("romComponent"), "rom.gif"),
-   };
-diff --git a/src/main/java/com/cburch/logisim/std/memory/Timer.java b/src/main/java/com/cburch/logisim/std/memory/Timer.java
+diff --git a/src/main/java/com/cburch/logisim/std/Builtin.java b/src/main/java/com/cburch/logisim/std/Builtin.java
+index e1be1ed06..cdb3a9d24 100644
+--- a/src/main/java/com/cburch/logisim/std/Builtin.java
++++ b/src/main/java/com/cburch/logisim/std/Builtin.java
+@@ -19,6 +19,7 @@ import com.cburch.logisim.std.gates.GatesLibrary;
+ import com.cburch.logisim.std.hdl.HdlLibrary;
+ import com.cburch.logisim.std.io.IoLibrary;
+ import com.cburch.logisim.std.io.extra.ExtraIoLibrary;
++import com.cburch.logisim.std.jonichoBasys3EditionLib.JonichoBasys3EditionLibrary;
+ import com.cburch.logisim.std.memory.MemoryLibrary;
+ import com.cburch.logisim.std.plexers.PlexersLibrary;
+ import com.cburch.logisim.std.tcl.TclLibrary;
+@@ -56,7 +57,8 @@ public class Builtin extends Library {
+             new TclLibrary(),
+             new BfhLibrary(),
+             new ExtraIoLibrary(),
+-            new Soc());
++            new Soc(),
++            new JonichoBasys3EditionLibrary());
+   }
+ 
+   @Override
+diff --git a/src/main/java/com/cburch/logisim/std/jonichoBasys3EditionLib/JonichoBasys3EditionLibrary.java b/src/main/java/com/cburch/logisim/std/jonichoBasys3EditionLib/JonichoBasys3EditionLibrary.java
 new file mode 100644
-index 000000000..4800525a1
+index 000000000..b02d4df96
 --- /dev/null
-+++ b/src/main/java/com/cburch/logisim/std/memory/Timer.java
-@@ -0,0 +1,202 @@
-+package com.cburch.logisim.std.memory;
++++ b/src/main/java/com/cburch/logisim/std/jonichoBasys3EditionLib/JonichoBasys3EditionLibrary.java
+@@ -0,0 +1,41 @@
++package com.cburch.logisim.std.jonichoBasys3EditionLib;
++
++import static com.cburch.logisim.std.Strings.S;
++
++import java.util.List;
++
++import com.cburch.logisim.tools.FactoryDescription;
++import com.cburch.logisim.tools.Library;
++import com.cburch.logisim.tools.Tool;
++
++public class JonichoBasys3EditionLibrary extends Library {
++  /**
++   * Unique identifier of the library, used as reference in project files. Do NOT
++   * change as it will
++   * prevent project files from loading.
++   *
++   * <p>
++   * Identifier value must MUST be unique string among all libraries.
++   */
++  public static final String _ID = "JonichoBasys3Edition";
++
++  private static final FactoryDescription[] DESCRIPTIONS = {
++      new FactoryDescription(Timer.class, S.getter("timerComponent"), "timer.gif"),
++  };
++
++  private List<Tool> tools = null;
++
++  @Override
++  public String getDisplayName() {
++    return "Jonicho Basys3 Edition";
++  }
++
++  @Override
++  public List<Tool> getTools() {
++    if (tools == null) {
++      tools = FactoryDescription.getTools(JonichoBasys3EditionLibrary.class, DESCRIPTIONS);
++    }
++    return tools;
++  }
++
++}
+diff --git a/src/main/java/com/cburch/logisim/std/jonichoBasys3EditionLib/Timer.java b/src/main/java/com/cburch/logisim/std/jonichoBasys3EditionLib/Timer.java
+new file mode 100644
+index 000000000..c85f77867
+--- /dev/null
++++ b/src/main/java/com/cburch/logisim/std/jonichoBasys3EditionLib/Timer.java
+@@ -0,0 +1,203 @@
++package com.cburch.logisim.std.jonichoBasys3EditionLib;
 +
 +import static com.cburch.logisim.std.Strings.S;
 +
@@ -38,6 +95,7 @@ index 000000000..4800525a1
 +import com.cburch.logisim.instance.Port;
 +import com.cburch.logisim.instance.StdAttr;
 +import com.cburch.logisim.prefs.AppPreferences;
++import com.cburch.logisim.std.memory.ClockState;
 +import com.cburch.logisim.util.GraphicsUtil;
 +
 +public class Timer extends InstanceFactory {
@@ -220,13 +278,13 @@ index 000000000..4800525a1
 +  }
 +
 +}
-diff --git a/src/main/java/com/cburch/logisim/std/memory/TimerHDLGeneratorFactory.java b/src/main/java/com/cburch/logisim/std/memory/TimerHDLGeneratorFactory.java
+diff --git a/src/main/java/com/cburch/logisim/std/jonichoBasys3EditionLib/TimerHDLGeneratorFactory.java b/src/main/java/com/cburch/logisim/std/jonichoBasys3EditionLib/TimerHDLGeneratorFactory.java
 new file mode 100644
-index 000000000..840dd4d88
+index 000000000..bb19aaf5d
 --- /dev/null
-+++ b/src/main/java/com/cburch/logisim/std/memory/TimerHDLGeneratorFactory.java
++++ b/src/main/java/com/cburch/logisim/std/jonichoBasys3EditionLib/TimerHDLGeneratorFactory.java
 @@ -0,0 +1,97 @@
-+package com.cburch.logisim.std.memory;
++package com.cburch.logisim.std.jonichoBasys3EditionLib;
 +
 +import java.util.HashMap;
 +
@@ -323,6 +381,18 @@ index 000000000..840dd4d88
 +    return contents;
 +  }
 +}
+diff --git a/src/main/resources/resources/logisim/default.templ b/src/main/resources/resources/logisim/default.templ
+index 492d488ed..c259b229d 100644
+--- a/src/main/resources/resources/logisim/default.templ
++++ b/src/main/resources/resources/logisim/default.templ
+@@ -13,6 +13,7 @@
+  <lib name="9" desc="#BFH-Praktika" />
+  <lib name="B" desc="#Input/Output-Extra" />
+  <lib name="C" desc="#Soc" />
++ <lib name="JonichoBasys3Edition" desc="#JonichoBasys3Edition" />
+ 
+  <options>
+   <a name="showgrid" val="true" />
 diff --git a/src/main/resources/resources/logisim/strings/std/std.properties b/src/main/resources/resources/logisim/strings/std/std.properties
 index 433268988..259e80da7 100644
 --- a/src/main/resources/resources/logisim/strings/std/std.properties

@@ -1,7 +1,7 @@
 Fixes HDL generation such that the Video, Keyboard and Timer components get a global clock connection.
 
 diff --git a/src/main/java/com/cburch/logisim/fpga/hdlgenerator/AbstractHdlGeneratorFactory.java b/src/main/java/com/cburch/logisim/fpga/hdlgenerator/AbstractHdlGeneratorFactory.java
-index 6fc6e11e2..5dfb518b5 100644
+index 6fc6e11e2..ca80418e4 100644
 --- a/src/main/java/com/cburch/logisim/fpga/hdlgenerator/AbstractHdlGeneratorFactory.java
 +++ b/src/main/java/com/cburch/logisim/fpga/hdlgenerator/AbstractHdlGeneratorFactory.java
 @@ -18,6 +18,9 @@ import com.cburch.logisim.fpga.gui.Reporter;
@@ -10,7 +10,7 @@ index 6fc6e11e2..5dfb518b5 100644
  import com.cburch.logisim.prefs.AppPreferences;
 +import com.cburch.logisim.std.io.Keyboard;
 +import com.cburch.logisim.std.io.Video;
-+import com.cburch.logisim.std.memory.Timer;
++import com.cburch.logisim.std.jonichoBasys3EditionLib.Timer;
  import com.cburch.logisim.std.wiring.ClockHdlGeneratorFactory;
  import com.cburch.logisim.util.LineBuffer;
  import com.cburch.logisim.util.StringUtil;
