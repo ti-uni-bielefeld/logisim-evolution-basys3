@@ -58,3 +58,13 @@ To synthesize and download a circuit to the Basys3 FPGA board, follow these step
 9. When the circuit was successfully synthesized a dialog will open asking for confirmation to download the circuit to the Basys3 board. Click on **Yes, download** after making sure the Basys3 board is connected to the computer and turned on.
 
 **Note:** Even if the circuit was successfully downloaded to the Basys3 board, Logisim may still display an error message. This can be ignored if the circuit runs correctly on the Basys3 board.
+
+## Timer component
+
+A timer component is available in the Memory library in the patched version of Logisim Evolution to provide a consistent time source for circuits in the simulation and on the Basys3 board by generating a signal with a set time duration.
+
+The unit of the time can be set in the component properties to either microseconds, milliseconds, or seconds.
+
+To start the timer, set the `Duration` input to the desired time value and the `Set` input to 1. The timer will then start with the set time on the next rising edge of the clock input. The timer will now set the `Out` output to 1 for one clock cycle every time the duration has passed. Note that the timer only updates on a rising edge of the clock input.
+
+Setting the duration to 0 deactivates the timer.

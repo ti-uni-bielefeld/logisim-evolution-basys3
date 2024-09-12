@@ -9,7 +9,8 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
 - Script to start Logisim Evolution
 - User Manual with instructions on how to synthesize and download circuits to the Basys3 FPGA board
 - Additional patches onto Logisim Evolution 3.9.0 to make it easier to synthesize and download circuits to the Basys3 FPGA board. These patches include:
-    - FPGA support for Keyboard and Video components (see [Keyboard and Video components](#keyboard-and-video-components))
+    - FPGA support for Keyboard and Video components (see [Keyboard and Video components](#fpga-support-for-the-keyboard-and-video-components))
+    - Timer component (see [Timer component](USER_MANUAL.md#timer-component))
     - Only show Basys3 board in FPGA menu
     - Fix for asynchronous RAM
     - Automatically set Vivado tool path
@@ -80,9 +81,9 @@ The example circuit simply reads values from the Keyboard component and displays
 
 Simply run Logisim Evolution as described above and open the `example.circ` file and follow the instructions in the [User Manual](USER_MANUAL.md) to synthesize and download the circuit to the Basys3 FPGA board.
 
-## Keyboard and Video components
+## FPGA support for the Keyboard and Video components
 
-The Keyboard and Video components are not supported for synthesis by stock Logisim Evolution, so they have been patched to be supported. 
+The Keyboard and Video components are not supported for synthesis by stock Logisim Evolution, so they have been patched to be supported.
 
 ### Keyboard component
 
