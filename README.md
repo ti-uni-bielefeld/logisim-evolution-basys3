@@ -63,13 +63,13 @@ $ sudo apt install libtinfo5
 To update Logisim Evolution, simply follow the installation instructions again. The installation script will detect if Java or Vivado are already installed and only reinstall Logisim Evolution.
 
 ## Usage
-After installing, you can run Logisim Evolution by running the run script in the `logisim-evolution` directory:
+After installing, you can run Logisim Evolution by running the run script in the installed directory:
 ```bash
-$ <install directory>/logisim-evolution/run.sh
+$ <install directory>/run.sh
 ```
 For example:
 ```bash
-$ /etc/opt/logisim-evolution-basys3/logisim-evolution/run.sh
+$ /etc/opt/logisim-evolution-basys3/run.sh
 ```
 For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](user_manual/USER_MANUAL.md), which also gets installed into the install directory.
 

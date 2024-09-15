@@ -19,6 +19,8 @@ cp -r $SCRIPT_DIR/{README.md,example.circ,user_manual/,LICENSE} $INSTALL_PATH/
 
 # remove potentially still existing old files from previous versions
 rm -f $INSTALL_PATH/USER_MANUAL.md
+rm -f $INSTALL_PATH/logisim-evolution/{logisim-evolution.jar,run.sh}
+rmdir $INSTALL_PATH/logisim-evolution 2>/dev/null || true
 
 echo "Installing Java..."
 ./install_files/install_java.sh $INSTALL_PATH/java
@@ -30,4 +32,4 @@ if [ "$#" -ge 2 ]; then
 fi
 
 echo "Installing Logisim Evolution..."
-./install_files/install_logisim-evolution.sh $INSTALL_PATH/logisim-evolution $INSTALL_PATH/Xilinx $INSTALL_PATH/java
+./install_files/install_logisim-evolution.sh $INSTALL_PATH $INSTALL_PATH/Xilinx $INSTALL_PATH/java
