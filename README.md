@@ -44,7 +44,7 @@ This repo was developed with a specific exemplary setup in mind which is describ
 
 On some systems the download to the Basys3 board may fail with the error message `There is no current hw_target.` If this is the case for you, the udev rules in `<install directory>/Xilinx/Vivado/2023.2/data/xicom/cable_drivers/lin64/install_script/install_drivers/52-xilinx-digilent-usb.rules` need to be installed. You can do this either manually by copying that file into `/etc/udev/rules.d/` and setting the permissions to 644, or run the install script as root:
 ```bash
-$ sudo <install directory>/Xilinx/Vivado/2023.2/data/xicom/cable_drivers/lin64/install_script/install_drivers/install_digilent.sh
+$ sudo <install directory>/Xilinx/Vivado/2023.2/data/xicom/cable_drivers/lin64/install_script/install_drivers/install_drivers
 ```
 
 #### Error when Creating Vivado project
