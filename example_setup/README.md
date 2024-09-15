@@ -8,7 +8,7 @@ This document describes an exemplary setup with a Basys3 FPGA board, a display a
 
 - Basys3 FPGA board (https://digilent.com/reference/programmable-logic/basys-3/start)
 - Joy-IT 7 inch LCD display RB-LCD-7-3 (https://joy-it.net/en/products/RB-LCD-7-3) (the touch functionality is not used)
-- Keysonic ACK-3401U (https://keysonic.de/product/ack-3401u/) (any USB keyboard should work)
+- Keysonic ACK-3401U (https://keysonic.de/product/ack-3401u/) (any USB keyboard is supposed to work, however in practice some USB keyboards were found to not work properly, so some trial and error might be necessary)
 - 2 x USB cable (USB A (male) -> Micro USB (male)) (one for connecting the Basys3 board to the computer, one for supplying power to the display)
 - USB extension cable (USB A (male) -> USB A (female)) (for connecting the keyboard to the Basys3 board)
 - USB charger (for supplying power to the display)
