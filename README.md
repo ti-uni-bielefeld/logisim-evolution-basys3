@@ -104,12 +104,13 @@ The Video component can be mapped to the internal VGA controller of the Basys3 b
 
 ## Authors and Contributors
 
-Most of the work was done by [Jonas Keller](https://github.com/jonicho) on behalf of the [Computer Engineering Group (AG Technische Informatik)
-of Bielefeld University](https://www.ti.uni-bielefeld.de/).
+Most of the work was done by [Jonas Keller](https://github.com/jonicho) on behalf of the [Computer Engineering Group (AG Technische Informatik) of Bielefeld University](https://www.ti.uni-bielefeld.de/).
 
 The example setup was designed by [Klaus Kulitza](https://ekvv.uni-bielefeld.de/pers_publ/publ/PersonDetail.jsp?personId=5314955) on behalf of the [Computer Engineering Group (AG Technische Informatik) of Bielefeld University](https://www.ti.uni-bielefeld.de/).
 
 The patches for the [Keyboard](install_files/logisim-evolution-patches/keyboard-fpga-support.patch) and [Video](install_files/logisim-evolution-patches/video-fpga-support.patch) components contain modified code from DigiKey ([Keyboard](https://forum.digikey.com/t/ps-2-keyboard-to-ascii-converter-vhdl/12616) and [Video](https://forum.digikey.com/t/vga-controller-vhdl/12794)).
+
+The project was initiated and supervised by [Prof. Dr.-Ing. Ralf Möller](https://www.ti.uni-bielefeld.de/html/people/moeller/). Software and setup are used for the course ["Technische Informatik" (Computer Engineering)](https://www.ti.uni-bielefeld.de/html/teaching/) at the Faculty of Technology, Bielefeld University. Financial support was kindly provided by the "Qualitätsfonds Lehre" (Teaching Quality Fund) of Bielefeld University.
 
 ## License
 
