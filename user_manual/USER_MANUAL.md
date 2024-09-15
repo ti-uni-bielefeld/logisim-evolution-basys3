@@ -17,13 +17,16 @@ All clock inputs must be connected directly to a clock component, without interm
 
 If a gated clock is used, the circuit downloaded to the FPGA may not behave in the same way as in Logisim.
 
-If Logisim detects a gated clock in the circuit, a warning is displayed in the synthesis window under the **Warnings** tab:\
+If Logisim detects a gated clock in the circuit, a warning is displayed in the synthesis window under the **Warnings** tab after the execute step in [Synthesizing and downloading a circuit to the Basys3 FPGA board](#synthesizing-and-downloading-a-circuit-to-the-basys3-fpga-board):\
 **Found a gated clock. Be careful, the real hardware may not work correctly.**\
-or \
+and \
 **Component "\*" in circuit "\*" has a gated clock connection!**\
-By clicking on the symbol to the left of the warning in the **Warnings** tab, the component that generated the warning is marked in the circuit diagram.
+By clicking on the symbol to the left of the warning in the **Warnings** tab, the component that generated the warning is marked in the circuit diagram.\
+![Gated clock warning](images/gated_clock_warning.png)
 
-In particular, this means that the clock signals `CLK1` (tick) and `CLK2` (tock) cannot be realized by an inverter gate. Instead, two clock components with a phase offset can be used. (Set **High Duration** and **Low Duration** to the same value for both clock components and set **Phase Offset** to this value for one of the two clock components and to 0 for the other).
+In particular, this means that two clock signals that are the inverse of each other cannot be realized by an inverter gate. Instead, two clock components with a phase offset can be used (set **High Duration** and **Low Duration** to the same value for both clock components and set **Phase Offset** to this value for one of the two clock components and to 0 for the other):\
+![Clock components](images/clock_components_1.png)\
+![Clock components](images/clock_components_2.png)
 
 ### Don't use RAM to download data to the FPGA Board
 
@@ -46,16 +49,28 @@ In components where the clock trigger can be set, always use the rising edge tri
 To synthesize and download a circuit to the Basys3 FPGA board, follow these steps:
 
 1. Open the circuit in Logisim Evolution.
-2. Click on **FPGA** -> **Synthesize & Download**.
-3. Enter the clock frequency you want the circuit to run at in the **Clock settings** section. (The divider updates automatically for the entered clock frequency.)
+2. Click on **FPGA** -> **Synthesize & Download**.\
+![Synthesize & Download](images/synthesize_and_download.png)
+3. Enter the clock frequency you want the circuit to run at in the **Clock settings** section. (The divider updates automatically for the entered clock frequency.)\
+![Clock settings](images/clock_settings.png)
 
     You can see what clock frequency the circuit runs at in the simulation by going to **File** -> **Preferences** -> **Window** and ticking **Show tick rate**. The shown tick rate is half of what needs to be set as the clock frequency in order to run the circuit at the same speed on the Basys3 board.
-4. In the section **Annotation method** select **Label only the components without a label** in the dropdown and click on **Annotate**. This will label all components that are not already labeled with a name, which is necessary for the synthesis.
-5. In the section **Action method**, select the desired circuit as the **Toplevel** and select **Synthesize & Download** in the dropdown menu.
-6. Click on **Execute**.
-7. Now a window to map input and output components to the Basys3 board will open. 
-8. Click on an unmapped component in the list at the top left and then click on the rectangle in the image of the board belonging to the corresponding component you want to map it to. The component will then be moved into the mapped component list on the right. Repeat this for all components and click on **Done**.
-9. When the circuit was successfully synthesized a dialog will open asking for confirmation to download the circuit to the Basys3 board. Click on **Yes, download** after making sure the Basys3 board is connected to the computer and turned on.
+4. In the section **Annotation method** select **Label only the components without a label** in the dropdown and click on **Annotate**. This will label all components that are not already labeled with a name, which is necessary for the synthesis.\
+![Annotate](images/annotate.png)
+5. In the section **Action method**, select the desired circuit as the **Toplevel** and select **Synthesize & Download** in the dropdown menu.\
+![Action method](images/action_method.png)
+6. Click on **Execute**.\
+![Execute](images/execute.png)
+7. Now a window to map input and output components to the Basys3 board will open.
+
+    Click on an unmapped component in the list at the top left and then click on the rectangle in the image of the board belonging to the corresponding component you want to map it to. The component will then be moved into the mapped component list on the right.\
+    ![Map components](images/map_components.png)
+
+8. Repeat this for all components and click on **Done**.\
+![Done](images/done.png)
+
+9. When the circuit was successfully synthesized a dialog will open asking for confirmation to download the circuit to the Basys3 board. Click on **Yes, download** after making sure the Basys3 board is connected to the computer and turned on.\
+![Download](images/download.png)
 
 **Note:** Even if the circuit was successfully downloaded to the Basys3 board, Logisim may still display an error message. This can be ignored if the circuit runs correctly on the Basys3 board.
 

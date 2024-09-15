@@ -15,7 +15,10 @@ INSTALL_PATH=$1
 mkdir -p $INSTALL_PATH
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cp $SCRIPT_DIR/{README.md,example.circ,USER_MANUAL.md,LICENSE} $INSTALL_PATH/
+cp -r $SCRIPT_DIR/{README.md,example.circ,user_manual/,LICENSE} $INSTALL_PATH/
+
+# remove potentially still existing old files from previous versions
+rm -f $INSTALL_PATH/USER_MANUAL.md
 
 echo "Installing Java..."
 ./install_files/install_java.sh $INSTALL_PATH/java

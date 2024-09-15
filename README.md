@@ -7,10 +7,10 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
 ## Features
 - Installer for Java, Vivado and Logisim Evolution into a directory of your choice
 - Script to start Logisim Evolution
-- User Manual with instructions on how to synthesize and download circuits to the Basys3 FPGA board
+- [User Manual](user_manual/USER_MANUAL.md) with instructions on how to synthesize and download circuits to the Basys3 FPGA board
 - Additional patches onto Logisim Evolution 3.9.0 to make it easier to synthesize and download circuits to the Basys3 FPGA board. These patches include:
     - FPGA support for Keyboard and Video components (see [Keyboard and Video components](#fpga-support-for-the-keyboard-and-video-components))
-    - Timer component (see [Timer component](USER_MANUAL.md#timer-component))
+    - Timer component (see [Timer component](user_manual/USER_MANUAL.md#timer-component))
     - Only show Basys3 board in FPGA menu
     - Fix for asynchronous RAM
     - Automatically set Vivado tool path
@@ -71,7 +71,7 @@ For example:
 ```bash
 $ /etc/opt/logisim-evolution-basys3/logisim-evolution/run.sh
 ```
-For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](USER_MANUAL.md), which also gets installed into the install directory.
+For more information on how to synthesize and download circuits to the Basys3 FPGA board, see the [User Manual](user_manual/USER_MANUAL.md), which also gets installed into the install directory.
 
 ## Example Circuit
 
@@ -79,7 +79,7 @@ An example circuit that demonstrates the usage of the Basys3 board and the Keybo
 
 The example circuit simply reads values from the Keyboard component and displays them bitwise on the Video component.
 
-Simply run Logisim Evolution as described above and open the `example.circ` file and follow the instructions in the [User Manual](USER_MANUAL.md) to synthesize and download the circuit to the Basys3 FPGA board.
+Simply run Logisim Evolution as described above and open the `example.circ` file and follow the instructions in the [User Manual](user_manual/USER_MANUAL.md) to synthesize and download the circuit to the Basys3 FPGA board.
 
 ## FPGA support for the Keyboard and Video components
 
