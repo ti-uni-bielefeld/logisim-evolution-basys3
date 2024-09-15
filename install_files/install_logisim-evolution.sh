@@ -62,14 +62,14 @@ RELATIVE_TO_OPTIONS="-s --relative-to $INSTALL_PATH"
 
 if [ -n "$VIVADO_BIN_PATH" ]; then
     echo "Setting up run script..."
-    VIVADO_PATH_OPTION="--vivado-tool-path \$SCRIPTPATH/\"$(realpath $RELATIVE_TO_OPTIONS $VIVADO_BIN_PATH)\""
+    VIVADO_PATH_OPTION="--vivado-tool-path \"\$SCRIPTPATH/$(realpath $RELATIVE_TO_OPTIONS $VIVADO_BIN_PATH)\""
 else
     echo "Setting up run script without linking Vivado..."
     VIVADO_PATH_OPTION=""
 fi
 echo "#!/bin/bash" > $INSTALL_PATH/run.sh
 echo "SCRIPTPATH=\"\$( cd -- \"\$(dirname \"\$0\")\" >/dev/null 2>&1 ; pwd -P )\"" >> $INSTALL_PATH/run.sh
-echo "\$SCRIPTPATH/$(realpath $RELATIVE_TO_OPTIONS $JAVA_HOME/bin/java) -jar \$SCRIPTPATH/$(realpath $RELATIVE_TO_OPTIONS $INSTALL_PATH/logisim-evolution.jar) $VIVADO_PATH_OPTION" >> $INSTALL_PATH/run.sh
+echo "\"\$SCRIPTPATH/$(realpath $RELATIVE_TO_OPTIONS $JAVA_HOME/bin/java)\" -jar \$SCRIPTPATH/$(realpath $RELATIVE_TO_OPTIONS $INSTALL_PATH/logisim-evolution.jar) $VIVADO_PATH_OPTION" >> $INSTALL_PATH/run.sh
 chmod a+x $INSTALL_PATH/run.sh
 
 echo "Cleaning up..."
