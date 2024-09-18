@@ -76,7 +76,9 @@ To synthesize and download a circuit to the Basys3 FPGA board, follow these step
 
 ## Timer component
 
-A timer component is available in the Memory library in the patched version of Logisim Evolution to provide a consistent time source for circuits in the simulation and on the Basys3 board by generating a signal with a set time duration.
+A timer component is available in an additional "Jonicho Basys3 Edition" library in the patched version of Logisim Evolution to provide a consistent time source for circuits in the simulation and on the Basys3 board by generating a signal with a set time duration.
+
+If the "Jonicho Basys3 Edition" library is not available in the components list, it can be added by clicking on **Project** -> **Load Library** -> **Built-in Library...** and selecting the "Jonicho Basys3 Edition" library.
 
 The unit of the time can be set in the component properties to either microseconds, milliseconds, or seconds.
 
