@@ -1,10 +1,8 @@
-Modifies the version and adds a link to the Basys3 edition repository in the about dialog.
-
 diff --git a/gradle.properties b/gradle.properties
-index 68194ddc9..6bd97d8d9 100644
+index 5aea29138..ed06c46ba 100644
 --- a/gradle.properties
 +++ b/gradle.properties
-@@ -11,7 +11,7 @@ name = logisim-evolution
+@@ -11,10 +11,10 @@ name = logisim-evolution
  # * For non-stable builds use anything that reflects build state (i.e. "dev", "beta1", "rc1").
  #
  # NOTE: if you use suffix, you MUST separate it from the version number with a hypen.
@@ -12,17 +10,20 @@ index 68194ddc9..6bd97d8d9 100644
 +version = 3.9.0-jonichoBasys3Edition
  
  # Project website URL (the shorter the better)
- url = https://github.com/logisim-evolution/
+-url = https://github.com/logisim-evolution/
++url = https://github.com/rm144/logisim-evolution-basys3
+ 
+ # Fix sonar warning
+ systemProp.sonar.gradle.skipCompile = true
 diff --git a/src/main/java/com/cburch/logisim/gui/start/AboutCredits.java b/src/main/java/com/cburch/logisim/gui/start/AboutCredits.java
-index 6d6e7d35a..9f3b48cd0 100644
+index 6d6e7d35a..f2794387c 100644
 --- a/src/main/java/com/cburch/logisim/gui/start/AboutCredits.java
 +++ b/src/main/java/com/cburch/logisim/gui/start/AboutCredits.java
-@@ -54,6 +54,8 @@ class AboutCredits extends JComponent {
+@@ -53,6 +53,7 @@ class AboutCredits extends JComponent {
+     lines
          .title(BuildInfo.displayName)
          .h2(String.format("Copyright \u00A92001-%s %s developers", BuildInfo.year, BuildInfo.name))
-         .url(BuildInfo.url)
 +        .h2("Modified Basys3 Version by jonicho")
-+        .url("https://github.com/rm144/logisim-evolution-basys3")
+         .url(BuildInfo.url)
          .space()
          .h1(S.get("creditsDevelopedBy"))
-         .text("David H. Hutchens")
