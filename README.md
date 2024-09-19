@@ -75,9 +75,9 @@ For more information on how to synthesize and download circuits to the Basys3 FP
 
 ## Example Circuit
 
-An example circuit that demonstrates the usage of the Basys3 board and the Keyboard and Video components can be found in the `example.circ` file in the install directory.
+An example circuit that demonstrates the usage of the Basys3 board and the Keyboard, Video and Timer components can be found in the `example.circ` file in the install directory.
 
-The example circuit simply reads values from the Keyboard component and displays them bitwise on the Video component.
+The example circuit simply reads values from the Keyboard component and displays them bitwise on the Video component and lets a pixel in the bottom middle of the screen blink every second between red and green.
 
 Simply run Logisim Evolution as described above and open the `example.circ` file and follow the instructions in the [User Manual](user_manual/USER_MANUAL.md) to synthesize and download the circuit to the Basys3 FPGA board.
 
