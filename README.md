@@ -22,13 +22,13 @@ This repo was developed with a specific exemplary setup in mind which is describ
 
 ## Installation
 1. Get a copy of this repository by doing either of the following:
-    - 1. Download the repository as a ZIP file with this link: https://github.com/rm144/logisim-evolution-basys3/archive/refs/heads/main.zip
+    - 1. Download the repository as a ZIP file with this link: https://github.com/ti-uni-bielefeld/logisim-evolution-basys3/archive/refs/heads/main.zip
       2. Extract it into your home directory (not the install directory) and change into the extracted directory
 
    Or
     - Clone this repository into your home directory (not the install directory) and change into the cloned directory:
         ```bash
-        $ git clone https://github.com/rm144/logisim-evolution-basys3
+        $ git clone https://github.com/ti-uni-bielefeld/logisim-evolution-basys3
         $ cd logisim-evolution-basys3
         ```
 3. If Vivado should be installed and linked with Logisim (this is only necessary if you want to synthesize and download circuits onto the Basys3 board and if Vivado isn't already installed in the install directory), download Vivado 2023.2 from https://account.amd.com/en/forms/downloads/xef.html?filename=FPGAs_AdaptiveSoCs_Unified_2023.2_1013_2256_Lin64.bin (requires an account)

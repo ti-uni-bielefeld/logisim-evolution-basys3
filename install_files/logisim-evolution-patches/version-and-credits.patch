@@ -11,7 +11,7 @@ index 5aea29138..ed06c46ba 100644
  
  # Project website URL (the shorter the better)
 -url = https://github.com/logisim-evolution/
-+url = https://github.com/rm144/logisim-evolution-basys3
++url = https://github.com/ti-uni-bielefeld/logisim-evolution-basys3
  
  # Fix sonar warning
  systemProp.sonar.gradle.skipCompile = true

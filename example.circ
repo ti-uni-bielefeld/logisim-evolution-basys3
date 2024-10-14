@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project source="3.9.0jonichoBasys3Edition" version="1.0">
-  This file is intended to be loaded by Logisim-evolution v3.9.0jonichoBasys3Edition(https://github.com/rm144/logisim-evolution-basys3).
+  This file is intended to be loaded by Logisim-evolution v3.9.0jonichoBasys3Edition(https://github.com/ti-uni-bielefeld/logisim-evolution-basys3).
 
   <lib desc="#Wiring" name="0">
     <tool name="Splitter">
