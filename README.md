@@ -112,6 +112,10 @@ The patches for the [Keyboard](install_files/logisim-evolution-patches/keyboard-
 
 The project was initiated and supervised by [Prof. Dr.-Ing. Ralf Möller](https://www.ti.uni-bielefeld.de/html/people/moeller/). Software and setup are used for the course ["Technische Informatik" (Computer Engineering)](https://www.ti.uni-bielefeld.de/html/teaching/) at the Faculty of Technology, Bielefeld University. Financial support was kindly provided by the "Qualitätsfonds Lehre" (Teaching Quality Fund) of Bielefeld University.
 
+## Bugs and Feature Requests
+
+If you find any bugs or have any feature requests, please open an issue on the [Issues](https://github.com/ti-uni-bielefeld/logisim-evolution-basys3/issues) page.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
