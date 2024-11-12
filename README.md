@@ -5,16 +5,15 @@ A set of scripts, manuals and patches to make synthesizing and downloading circu
 ![Example Setup](example_setup/images/setup.jpg)
 
 ## Features
-- Installer for Java, Vivado and Logisim Evolution into a directory of your choice
-- Script to start Logisim Evolution
+- FPGA support for Keyboard and Video components (see [Keyboard and Video components](#fpga-support-for-the-keyboard-and-video-components))
 - [User Manual](user_manual/USER_MANUAL.md) with instructions on how to synthesize and download circuits to the Basys3 FPGA board
-- Additional patches onto Logisim Evolution 3.9.0 to make it easier to synthesize and download circuits to the Basys3 FPGA board. These patches include:
-    - FPGA support for Keyboard and Video components (see [Keyboard and Video components](#fpga-support-for-the-keyboard-and-video-components))
+- Installer for Java, Vivado and Logisim Evolution into a directory of your choice
+- Instructions for an exemplary setup of the Basys3 board with a display and a keyboard (see [Example Setup](#example-setup))
+- Additional patches onto Logisim Evolution 3.9.0 for easier to synthesizing and downloading of circuits to the Basys3 FPGA board. These patches include:
     - Timer component (see [Timer component](user_manual/USER_MANUAL.md#timer-component))
     - Only show Basys3 board in FPGA menu
-    - Fix for asynchronous RAM
     - Automatically set Vivado tool path
-- Instructions for an exemplary setup of the Basys3 board with a display and a keyboard (see [Example Setup](#example-setup))
+    - Fix for asynchronous RAM
 
 ## Example Setup
 
