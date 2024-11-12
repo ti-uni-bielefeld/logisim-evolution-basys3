@@ -2,7 +2,7 @@
 
 A set of scripts, manuals and patches to make synthesizing and downloading circuits from [Logisim Evolution](https://github.com/logisim-evolution/logisim-evolution) onto the [Basys3 FPGA board](https://digilent.com/reference/programmable-logic/basys-3/start) on Linux easier and more seamless, including an exemplary setup with a display and a keyboard.
 
-![Example Setup](example_setup/images/setup.jpg)
+<img src="https://github.com/ti-uni-bielefeld/logisim-evolution-basys3/blob/main/example_setup/images/setup.jpg" alt="Example Setup" width=40% />
 
 ## Features
 - FPGA support for Keyboard and Video components (see [Keyboard and Video components](#fpga-support-for-the-keyboard-and-video-components))
