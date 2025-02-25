@@ -17,7 +17,7 @@ if [ -d "$INSTALL_PATH" ] && [ "$(ls -A $INSTALL_PATH)" ]; then
 fi
 
 mkdir -p $INSTALL_PATH
-ARCHIVE_PATH=${TMPDIR:-/tmp}/jdk-22_linux-x64_bin.tar.gz
-wget -O $ARCHIVE_PATH https://download.oracle.com/java/22/latest/jdk-22_linux-x64_bin.tar.gz
+ARCHIVE_PATH=${TMPDIR:-/tmp}/jdk-23_linux-x64_bin.tar.gz
+wget -O $ARCHIVE_PATH https://download.oracle.com/java/23/latest/jdk-23_linux-x64_bin.tar.gz
 tar -xzf $ARCHIVE_PATH -C $INSTALL_PATH
 rm $ARCHIVE_PATH
