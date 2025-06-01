@@ -11,7 +11,7 @@ if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
     exit 1
 fi
 
-INSTALL_PATH=$1
+INSTALL_PATH=$(realpath $1)
 mkdir -p $INSTALL_PATH
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
